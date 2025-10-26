@@ -1,0 +1,5 @@
+amends "pkl/config.pkl"
+
+nsglobaldomain {
+  AppleIconAppearanceTheme = "Auto"
+}
