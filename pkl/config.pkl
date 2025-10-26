@@ -4,6 +4,8 @@ module macfigure.config
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
 import "brew.pkl" as brewConfig
 import "nsglobaldomain.pkl" as nsglobaldomainConfig
+import "home.pkl" as homeConfig
 
 brew: brewConfig
 nsglobaldomain: nsglobaldomainConfig
+home: List<homeConfig>

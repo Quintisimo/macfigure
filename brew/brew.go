@@ -3,6 +3,7 @@ package brew
 import (
 	"errors"
 	"os"
+	"sync"
 
 	"github.com/quintisimo/macfigure/gen/brew"
 	"github.com/quintisimo/macfigure/utils"
@@ -30,7 +31,10 @@ func writeBrewFileLines(file *os.File, packagesType string, packages *[]string) 
 	return nil
 }
 
-func SetupPackages(config brew.Brew, dryRun bool) {
+func SetupPackages(config brew.Brew, dryRun bool, wg *sync.WaitGroup) {
+	wg.Add(1)
+	defer wg.Done()
+
 	file, err := os.CreateTemp("", "brew")
 	if err != nil {
 		panic(err)
