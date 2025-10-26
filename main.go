@@ -6,6 +6,7 @@ import (
 
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/gen/config"
+	"github.com/quintisimo/macfigure/home"
 	"github.com/quintisimo/macfigure/nsglobaldomain"
 )
 
@@ -20,4 +21,5 @@ func main() {
 
 	brew.SetupPackages(config.Brew, dryRun)
 	nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun)
+	home.SetupConfigs(config.Home, dryRun)
 }
