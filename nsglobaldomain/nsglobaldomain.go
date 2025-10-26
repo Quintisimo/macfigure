@@ -2,12 +2,16 @@ package nsglobaldomain
 
 import (
 	"reflect"
+	"sync"
 
 	"github.com/quintisimo/macfigure/gen/nsglobaldomain"
 	"github.com/quintisimo/macfigure/utils"
 )
 
-func WriteConfig(config nsglobaldomain.Nsglobaldomain, dryRun bool) {
+func WriteConfig(config nsglobaldomain.Nsglobaldomain, dryRun bool, wg *sync.WaitGroup) {
+	wg.Add(1)
+	defer wg.Done()
+
 	value := reflect.ValueOf(config)
 
 	for i := 0; i < value.NumField(); i++ {

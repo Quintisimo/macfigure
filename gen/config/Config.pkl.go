@@ -6,6 +6,7 @@ import (
 
 	"github.com/apple/pkl-go/pkl"
 	"github.com/quintisimo/macfigure/gen/brew"
+	"github.com/quintisimo/macfigure/gen/home"
 	"github.com/quintisimo/macfigure/gen/nsglobaldomain"
 )
 
@@ -13,6 +14,8 @@ type Config struct {
 	Brew brew.Brew `pkl:"brew"`
 
 	Nsglobaldomain nsglobaldomain.Nsglobaldomain `pkl:"nsglobaldomain"`
+
+	Home []home.Home `pkl:"home"`
 }
 
 // LoadFromPath loads the pkl module at the given path and evaluates it into a Config

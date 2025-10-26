@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"sync"
 
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/gen/config"
@@ -19,7 +20,9 @@ func main() {
 		panic(err)
 	}
 
-	brew.SetupPackages(config.Brew, dryRun)
-	nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun)
-	home.SetupConfigs(config.Home, dryRun)
+	wg := new(sync.WaitGroup)
+	go brew.SetupPackages(config.Brew, dryRun, wg)
+	go nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun, wg)
+	go home.SetupConfigs(config.Home, dryRun, wg)
+	wg.Wait()
 }

@@ -20,6 +20,10 @@ func SliceDifference(a, b []string) []string {
 	return diff
 }
 
+func DryRunInfo(info string) {
+	fmt.Println("[Dry Run] " + info)
+}
+
 func RunCommand(cmd string, info string, dryRun bool) {
 	if !dryRun {
 		fmt.Println(info)
@@ -28,7 +32,7 @@ func RunCommand(cmd string, info string, dryRun bool) {
 			panic(err)
 		}
 	} else {
-		fmt.Println("[Dry Run] Command: " + cmd)
+		DryRunInfo("[Dry Run] Command: " + cmd)
 	}
 }
 
