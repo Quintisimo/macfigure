@@ -8,7 +8,7 @@ import (
 )
 
 type Dock struct {
-	Apps *[]string `pkl:"apps"`
+	Apps *[]any `pkl:"apps"`
 
 	Folders *[]string `pkl:"folders"`
 

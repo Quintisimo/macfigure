@@ -9,5 +9,5 @@ import "dock.pkl" as dockConfig
 
 brew: brewConfig
 nsglobaldomain: nsglobaldomainConfig
-home: List<homeConfig>
+home: Listing<homeConfig>
 dock: dockConfig

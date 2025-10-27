@@ -10,7 +10,7 @@ import (
 type Home struct {
 	Target string `pkl:"target"`
 
-	Content string `pkl:"content"`
+	Source string `pkl:"source"`
 }
 
 // LoadFromPath loads the pkl module at the given path and evaluates it into a Home

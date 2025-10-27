@@ -11,14 +11,17 @@ import (
 func SetupConfigs(config []home.Home, dryRun bool) {
 	for _, item := range config {
 		if !dryRun {
-			file, err := os.Create(item.Target)
-			utils.PrintError(err)
+			contents, readErr := os.ReadFile(item.Source)
+			utils.PrintError(readErr)
 
+			file, createErr := os.Create(item.Target)
+			utils.PrintError(createErr)
 			defer file.Close()
-			_, writeErr := file.Write([]byte(item.Content))
+
+			_, writeErr := file.Write(contents)
 			utils.PrintError(writeErr)
 		} else {
-			utils.DryRunInfo(fmt.Sprintf("Creating file at %s with content:\n%s", item.Target, item.Content))
+			utils.DryRunInfo(fmt.Sprintf("Creating %s", item.Target))
 		}
 	}
 }
