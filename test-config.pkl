@@ -1,0 +1,12 @@
+amends "pkl/config.pkl"
+
+brew {
+  casks = List("zed")
+}
+nsglobaldomain {
+  AppleIconAppearanceTheme = "Auto"
+}
+dock {
+  apps = List("/Applications/Zed.app", "spacer", "small-spacer")
+  showRecents = false
+}

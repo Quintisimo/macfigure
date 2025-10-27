@@ -20,20 +20,27 @@ func SliceDifference(a, b []string) []string {
 	return diff
 }
 
+func PrintError(err error) {
+	if err != nil {
+		fmt.Println("[Error] " + err.Error())
+	}
+}
+
 func DryRunInfo(info string) {
 	fmt.Println("[Dry Run] " + info)
 }
 
-func RunCommand(cmd string, info string, dryRun bool) {
+func RunCommand(cmd string, info string, dryRun bool) error {
 	if !dryRun {
 		fmt.Println(info)
 		command := exec.Command(cmd)
 		if err := command.Run(); err != nil {
-			panic(err)
+			return err
 		}
 	} else {
-		DryRunInfo("[Dry Run] Command: " + cmd)
+		DryRunInfo("Command: " + cmd)
 	}
+	return nil
 }
 
 func CovertToString(value reflect.Value) string {
