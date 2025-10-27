@@ -1,0 +1,2 @@
+typealias Directory = String(startsWith("/"))
+typealias AppPath = String(startsWith("/Applications"), endsWith(".app"))

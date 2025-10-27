@@ -79,6 +79,7 @@ func SetupDock(config dock.Dock, dryRun bool) {
 		for _, path := range *config.Apps {
 			var cmd string
 			cmdPrefix := "defaults write com.apple.dock persistent-apps -array-add "
+			path := path.(string)
 
 			if isSpacer(path) {
 				cmd = fmt.Sprintf(`%s "{"tile-type"="%s-tile";}"`, cmdPrefix, path)
