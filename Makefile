@@ -1,6 +1,6 @@
 all: pkl run
 
-pkl: pkl/*.pkl
+gen: pkl/*.pkl
 	pkl-gen-go pkl/config.pkl
 
 run: main.go
