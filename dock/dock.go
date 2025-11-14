@@ -2,6 +2,7 @@ package dock
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/quintisimo/macfigure/gen/dock"
@@ -61,35 +62,28 @@ func getInfoMsg(path string) string {
 	if !isSpacer(path) {
 		name = path[strings.LastIndex(path, "/") : len(path)-1]
 	}
-	return "Add " + name + " to Dock"
+	return fmt.Sprintf("Add %s to Dock", name)
 }
 
-func SetupDock(config dock.Dock, dryRun bool) {
-	const delCmdPrefix = "defaults delete com.apple.dock "
-	appDelErr := utils.RunCommand(delCmdPrefix+"persistent-apps", "Clear persistent apps", dryRun)
-	utils.PrintError(appDelErr)
+func updateDockItems[I any | string](items *[]I, addCmd string, rmCmd string, clrMsg string, dryRun bool) {
+	delErr := utils.RunCommand(rmCmd, clrMsg, dryRun)
+	utils.PrintError(delErr)
 
-	otherDelErr := utils.RunCommand(delCmdPrefix+"persistent-others", "Clear persistent others", dryRun)
-	utils.PrintError(otherDelErr)
-
-	if config.ShowRecents != nil {
-		cmd := fmt.Sprintf("defaults write com.apple.dock show-recents -bool %t", *config.ShowRecents)
-		utils.RunCommand(cmd, fmt.Sprintf("Set show recents to %t", *config.ShowRecents), dryRun)
-	} else {
-		cmd := "defaults delete com.apple.dock show-recents"
-		utils.RunCommand(cmd, "Remove show recents setting", dryRun)
-	}
-
-	if config.Apps != nil {
-		for _, path := range *config.Apps {
+	if items != nil {
+		for _, path := range *items {
 			var cmd string
-			cmdPrefix := "defaults write com.apple.dock persistent-apps -array-add "
-			path := path.(string)
+			cmdPrefix := fmt.Sprintf("%s -array-add", addCmd)
+			path := fmt.Sprintf("%v", path)
 
 			if isSpacer(path) {
 				cmd = fmt.Sprintf(`%s "{"tile-type"="%s-tile";}"`, cmdPrefix, path)
 			} else {
-				cmd = fmt.Sprintf(`%s "%s"`, cmdPrefix, appXml(path))
+				xml := folderXml(path)
+				if strings.HasSuffix(path, ".app") {
+					xml = appXml(path)
+				}
+
+				cmd = fmt.Sprintf(`%s "%s"`, cmdPrefix, xml)
 			}
 
 			cmdErr := utils.RunCommand(cmd, getInfoMsg(path), dryRun)
@@ -97,13 +91,23 @@ func SetupDock(config dock.Dock, dryRun bool) {
 		}
 
 	}
+}
 
-	if config.Folders != nil {
-		for _, path := range *config.Folders {
-			cmd := fmt.Sprintf(`defaults write com.apple.dock persistent-others -array-add "%s"`, folderXml(path))
-			cmdErr := utils.RunCommand(cmd, getInfoMsg(path), dryRun)
-			utils.PrintError(cmdErr)
-		}
-	}
+func SetupDock(config dock.Dock, dryRun bool) {
+	const addCmd = "defaults write com.apple.dock"
+	const rmCmd = "defaults delete com.apple.dock"
+
+	const appsCmd = "persistent-apps"
+	appsAddCmd := fmt.Sprintf("%s %s", addCmd, appsCmd)
+	appsRmCmd := fmt.Sprintf("%s %s", rmCmd, appsCmd)
+	updateDockItems(config.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", dryRun)
+
+	const folderCmd = "persistent-others"
+	foldersAddCmd := fmt.Sprintf("%s %s", addCmd, folderCmd)
+	foldersRmCmd := fmt.Sprintf("%s %s", rmCmd, folderCmd)
+	updateDockItems(config.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", dryRun)
+
+	utils.WriteConfig(reflect.ValueOf(config), "com.apple.dock", addCmd, rmCmd, dryRun)
+
 	utils.RunCommand("killall Dock", "Restart Dock to apply changes", dryRun)
 }

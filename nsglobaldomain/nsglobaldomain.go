@@ -8,20 +8,5 @@ import (
 )
 
 func WriteConfig(config nsglobaldomain.Nsglobaldomain, dryRun bool) {
-	value := reflect.ValueOf(config)
-
-	for i := 0; i < value.NumField(); i++ {
-		field := value.Type().Field(i)
-		stringValue := utils.CovertToString(value.Field(i).Elem())
-
-		var cmd string
-		if stringValue != "" {
-			cmd = "defaults write NSGlobalDomain " + field.Name + " " + stringValue
-		} else {
-			cmd = "defaults delete -g " + field.Name
-		}
-
-		cmdErr := utils.RunCommand(cmd, "Deleting NSGlobalDomain "+field.Name, dryRun)
-		utils.PrintError(cmdErr)
-	}
+	utils.WriteConfig(reflect.ValueOf(config), "NSGlobalDomain", "defaults write NSGlobalDomain", "defaults delete -g", dryRun)
 }

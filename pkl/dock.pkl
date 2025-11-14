@@ -6,4 +6,34 @@ import "utils.pkl"
 
 apps: List<"spacer" | "small-spacer" | utils.AppPath>?
 folders: List<utils.Directory>?
-showRecents: Boolean?
+`appswitcher-all-displays`: Boolean?
+autohide: Boolean?
+`autohide-delay`: Float?
+`autohide-time-modifier`: Float?
+`dashboard-in-overlay`: Boolean?
+`enable-spring-load-actions-on-all-items`: Boolean?
+`expose-animation-duration`: Float?
+`expose-group-apps`: Boolean?
+`launchanim`: Boolean?
+`mineffect`: ("genie" | "suck" | "scale")?
+`minimize-to-application`: Boolean?
+`mouse-over-hilite-stack`: Boolean?
+`mru-spaces`: Boolean?
+orientation: ("bottom" | "left" | "right")?
+`scroll-to-open`: Boolean?
+showAppExposeGestureEnabled: Boolean?
+showDesktopGestureEnabled: Boolean?
+showLaunchpadGestureEnabled: Boolean?
+showMissionControlGestureEnabled: Boolean?
+`show-process-indicators`: Boolean?
+showhidden: Boolean?
+`show-recents`: Boolean?
+`slow-motion-allowed`: Boolean?
+`static-only`: Boolean?
+tilesize: Int?
+magnification: Boolean?
+largesize: Int(isBetween(16, 128))?
+`wvous-tl-corner`: Int(1, 14)?
+`wvous-bl-corner`: Int(1, 14)?
+`wvous-tr-corner`: Int(1, 14)?
+`wvous-br-corner`: Int(1, 14)?

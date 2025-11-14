@@ -4,9 +4,9 @@ brew {
   casks = List("zed")
 }
 nsglobaldomain {
-  AppleIconAppearanceTheme = "Auto"
+  AppleIconAppearanceTheme = "RegularAutomatic"
 }
 dock {
   apps = List("/Applications/Zed.app", "spacer", "small-spacer")
-  showRecents = false
+  `show-recents` = false
 }
