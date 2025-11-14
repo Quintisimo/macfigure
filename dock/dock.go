@@ -72,8 +72,13 @@ func SetupDock(config dock.Dock, dryRun bool) {
 	otherDelErr := utils.RunCommand(delCmdPrefix+"persistent-others", "Clear persistent others", dryRun)
 	utils.PrintError(otherDelErr)
 
-	cmd := fmt.Sprintf("defaults write com.apple.dock show-recents -bool %t", config.ShowRecents)
-	utils.RunCommand(cmd, fmt.Sprintf("Set show recents to %t", config.ShowRecents), dryRun)
+	if config.ShowRecents != nil {
+		cmd := fmt.Sprintf("defaults write com.apple.dock show-recents -bool %t", *config.ShowRecents)
+		utils.RunCommand(cmd, fmt.Sprintf("Set show recents to %t", *config.ShowRecents), dryRun)
+	} else {
+		cmd := "defaults delete com.apple.dock show-recents"
+		utils.RunCommand(cmd, "Remove show recents setting", dryRun)
+	}
 
 	if config.Apps != nil {
 		for _, path := range *config.Apps {

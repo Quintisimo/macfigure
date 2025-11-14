@@ -3,5 +3,55 @@ module macfigure.nsglobaldomain
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
 
-AppleIconAppearanceTheme: ("Light" | "Dark" | "Auto")?
+AppleShowAllFiles: Boolean?
+AppleEnableMouseSwipeNavigateWithScrolls: Boolean?
+AppleEnableSwipeNavigateWithScrolls: Boolean?
+AppleFontSmoothing: Int(isBetween(0, 2))?
+AppleInterfaceStyle: ("Dark")?
+AppleIconAppearanceTheme: ("RegularDark" | "RegularAutomatic" | "ClearLight" | "ClearDark" | "ClearAutomatic" | "TintedLight" | "TintedDark" | "TintedAutomatic")?
+AppleInterfaceStyleSwitchesAutomatically: Boolean?
+AppleKeyboardUIMode: Int(this == 0 || this == 2 || this == 3)?
+ApplePressAndHoldEnabled: Boolean?
+AppleShowAllExtensions: Boolean?
+AppleShowScrollBars: ("WhenScrolling" | "Automatic" | "Always")?
+AppleScrollerPagingBehavior: Boolean?
+AppleSpacesSwitchOnActivate: Boolean?
+NSAutomaticCapitalizationEnabled: Boolean?
+NSAutomaticInlinePredictionEnabled: Boolean?
+NSAutomaticDashSubstitutionEnabled: Boolean?
+NSAutomaticPeriodSubstitutionEnabled: Boolean?
+NSAutomaticQuoteSubstitutionEnabled: Boolean?
+NSAutomaticSpellingCorrectionEnabled: Boolean?
+NSAutomaticWindowAnimationsEnabled: Boolean?
+NSDisableAutomaticTermination: Boolean?
+NSDocumentSaveNewDocumentsToCloud: Boolean?
+AppleWindowTabbingMode: ("manual" | "always" | "fullscreen")?
+NSNavPanelExpandedStateForSaveMode: Boolean?
+NSNavPanelExpandedStateForSaveMode2: Boolean?
+NSTableViewDefaultSizeMode: Int(isBetween(1, 3))?
+NSTextShowsControlCharacters: Boolean?
+NSUseAnimatedFocusRing: Boolean?
+NSScrollAnimationEnabled: Boolean?
+NSWindowResizeTime: Float?
+NSWindowShouldDragOnGesture: Boolean?
 NSStatusItemSpacing: Int?
+NSStatusItemSelectionPadding: Int?
+KeyRepeat: Int?
+PMPrintingExpandedStateForPrint: Boolean?
+PMPrintingExpandedStateForPrint2: Boolean?
+`com.apple.keyboard.fnState`: Boolean?
+`com.apple.mouse.tapBehavior`:Int(this == 1)?
+`com.apple.sound.beep.volume`: Float(isBetween(0, 1))?
+`com.apple.sound.beep.feedback`: Int?
+`com.apple.trackpad.enableSecondaryClick`: Boolean?
+`com.apple.trackpad.trackpadCornerClickBehavior`: Int(this == 1)?
+`com.apple.trackpad.scaling`: Float(isBetween(0, 3))?
+`com.apple.trackpad.forceClick`: Boolean?
+`com.apple.springing.enabled`: Boolean?
+`com.apple.springing.delay`: Float?
+`com.apple.swipescrolldirection`: Boolean?
+AppleMeasurementUnits: ("Centimeters" | "Inches")?
+AppleMetricUnits: Int(isBetween(0, 1))?
+AppleTemperatureUnit: ("Celsius" | "Fahrenheit")?
+AppleICUForce24HourTime: Boolean?
+_HIHideMenuBar: Boolean?

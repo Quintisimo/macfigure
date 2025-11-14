@@ -6,4 +6,4 @@ import "utils.pkl"
 
 apps: List<"spacer" | "small-spacer" | utils.AppPath>?
 folders: List<utils.Directory>?
-showRecents: Boolean
+showRecents: Boolean?
