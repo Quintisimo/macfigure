@@ -9,19 +9,21 @@ import (
 )
 
 func SetupConfigs(config []home.Home, dryRun bool) {
-	for _, item := range config {
-		if !dryRun {
-			contents, readErr := os.ReadFile(item.Source)
-			utils.PrintError(readErr)
+	if utils.SliceHasItems(config) {
+		for _, item := range config {
+			if !dryRun {
+				contents, readErr := os.ReadFile(item.Source)
+				utils.PrintError(readErr)
 
-			file, createErr := os.Create(item.Target)
-			utils.PrintError(createErr)
-			defer file.Close()
+				file, createErr := os.Create(item.Target)
+				utils.PrintError(createErr)
+				defer file.Close()
 
-			_, writeErr := file.Write(contents)
-			utils.PrintError(writeErr)
-		} else {
-			utils.DryRunInfo(fmt.Sprintf("Creating %s", item.Target))
+				_, writeErr := file.Write(contents)
+				utils.PrintError(writeErr)
+			} else {
+				utils.DryRunInfo(fmt.Sprintf("Creating %s", item.Target))
+			}
 		}
 	}
 }

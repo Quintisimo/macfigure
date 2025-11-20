@@ -17,6 +17,10 @@ func DryRunInfo(info ...string) {
 	fmt.Println("[Dry Run]", info)
 }
 
+func SliceHasItems[I any](slice []I) bool {
+	return len(slice) > 0
+}
+
 func GetConfigPath() string {
 	homeDir := os.Getenv("XDG_CONFIG_HOME")
 	if homeDir == "" {
@@ -57,7 +61,7 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 	for i := 0; i < config.NumField(); i++ {
 		fieldName := config.Type().Field(i).Tag.Get("pkl")
 
-		if fieldName != "Apps" && fieldName != "Folders" {
+		if fieldName != "apps" && fieldName != "folders" {
 			field := config.Field(i)
 			value := ""
 

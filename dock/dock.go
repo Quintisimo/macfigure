@@ -65,12 +65,12 @@ func getInfoMsg(path string) string {
 	return fmt.Sprintf("Add %s to Dock", name)
 }
 
-func updateDockItems[I any | string](items *[]I, addCmd string, rmCmd string, clrMsg string, dryRun bool) {
+func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, dryRun bool) {
 	delErr := utils.RunCommand(rmCmd, clrMsg, dryRun)
 	utils.PrintError(delErr)
 
-	if items != nil {
-		for _, path := range *items {
+	if utils.SliceHasItems(items) {
+		for _, path := range items {
 			var cmd string
 			cmdPrefix := fmt.Sprintf("%s -array-add", addCmd)
 			path := fmt.Sprintf("%v", path)

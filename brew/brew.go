@@ -9,7 +9,7 @@ import (
 	"github.com/quintisimo/macfigure/utils"
 )
 
-func writeBrewFileLines(file *os.File, packagesType string, packages *[]string) error {
+func writeBrewFileLines(file *os.File, packagesType string, packages []string) error {
 	prefix := "brew"
 
 	if packagesType != "cask" && packagesType != "formula" {
@@ -20,8 +20,8 @@ func writeBrewFileLines(file *os.File, packagesType string, packages *[]string) 
 		prefix = "cask"
 	}
 
-	if packages != nil {
-		for _, item := range *packages {
+	if utils.SliceHasItems(packages) {
+		for _, item := range packages {
 			line := fmt.Sprintln(prefix, `"`, item, `"`)
 			if _, err := file.Write([]byte(line)); err != nil {
 				return err

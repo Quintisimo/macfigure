@@ -4,8 +4,8 @@ module macfigure.dock
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
 import "utils.pkl"
 
-apps: List<"spacer" | "small-spacer" | utils.AppPath>?
-folders: List<utils.Directory>?
+apps: List<"spacer" | "small-spacer" | utils.AppPath>
+folders: List<utils.Directory>
 `appswitcher-all-displays`: Boolean?
 autohide: Boolean?
 `autohide-delay`: Float?
