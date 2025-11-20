@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
 	"sync"
 
 	"github.com/quintisimo/macfigure/brew"
@@ -10,13 +11,21 @@ import (
 	"github.com/quintisimo/macfigure/gen/config"
 	"github.com/quintisimo/macfigure/home"
 	"github.com/quintisimo/macfigure/nsglobaldomain"
+	"github.com/quintisimo/macfigure/utils"
 )
 
 func main() {
-	dryRun := *flag.Bool("dry-run", true, "Perform a dry run without making any changes")
+	dryRun := flag.Bool("dry-run", true, "Perform a dry run without making any changes")
+	configFile := flag.String("config", utils.GetConfigPath(), "Path to the configuration file")
+	syncSystem := flag.Bool("sync", false, "Sync system with configuration file")
 	flag.Parse()
 
-	config, err := config.LoadFromPath(context.Background(), "test-config.pkl")
+	if !*syncSystem && !*dryRun {
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
+
+	config, err := config.LoadFromPath(context.Background(), *configFile)
 	if err != nil {
 		panic(err)
 	}
@@ -24,19 +33,19 @@ func main() {
 	wg := new(sync.WaitGroup)
 
 	wg.Go(func() {
-		brew.SetupPackages(config.Brew, dryRun)
+		brew.SetupPackages(config.Brew, *dryRun)
 	})
 
 	wg.Go(func() {
-		nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun)
+		nsglobaldomain.WriteConfig(config.Nsglobaldomain, *dryRun)
 	})
 
 	wg.Go(func() {
-		home.SetupConfigs(config.Home, dryRun)
+		home.SetupConfigs(config.Home, *dryRun)
 	})
 
 	wg.Go(func() {
-		dock.SetupDock(config.Dock, dryRun)
+		dock.SetupDock(config.Dock, *dryRun)
 	})
 
 	wg.Wait()

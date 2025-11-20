@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"reflect"
 )
@@ -14,6 +15,14 @@ func PrintError(err error) {
 
 func DryRunInfo(info ...string) {
 	fmt.Println("[Dry Run]", info)
+}
+
+func GetConfigPath() string {
+	homeDir := os.Getenv("XDG_CONFIG_HOME")
+	if homeDir == "" {
+		homeDir = fmt.Sprintf("%s/.config", os.Getenv("HOME"))
+	}
+	return fmt.Sprintf("%s/macfigure/config.pkl", homeDir)
 }
 
 func RunCommand(cmd string, info string, dryRun bool) error {
