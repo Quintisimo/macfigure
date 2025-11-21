@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"flag"
+	"log"
 	"os"
 	"sync"
 
@@ -13,45 +13,70 @@ import (
 	"github.com/quintisimo/macfigure/home"
 	"github.com/quintisimo/macfigure/nsglobaldomain"
 	"github.com/quintisimo/macfigure/utils"
+	"github.com/urfave/cli/v3"
 )
 
 func main() {
-	dryRun := flag.Bool("dry-run", true, "Perform a dry run without making any changes")
-	configFile := flag.String("config", utils.GetConfigPath(), "Path to the configuration file")
-	syncSystem := flag.Bool("sync", false, "Sync system with configuration file")
-	flag.Parse()
+	cmd := &cli.Command{
+		Name:  "macfigure",
+		Usage: "A tool to manage macOS configurations",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Value: true,
+				Usage: "Perform a dry run without making any changes",
+			},
+		},
+		Commands: []*cli.Command{
+			{
+				Name:  "sync",
+				Usage: "Sync system with config",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "config",
+						Usage: "Path to the configuration file",
+						Value: utils.GetConfigPath(),
+					},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					dryRun := cmd.Bool("dry-run")
+					configFile := cmd.String("config")
 
-	if !*syncSystem && !*dryRun {
-		flag.PrintDefaults()
-		os.Exit(0)
+					config, err := config.LoadFromPath(context.Background(), configFile)
+					if err != nil {
+						panic(err)
+					}
+
+					wg := new(sync.WaitGroup)
+
+					wg.Go(func() {
+						brew.SetupPackages(config.Brew, dryRun)
+					})
+
+					wg.Go(func() {
+						nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun)
+					})
+
+					wg.Go(func() {
+						home.SetupConfigs(config.Home, dryRun)
+					})
+
+					wg.Go(func() {
+						cron.SetupCronJobs(config.Cron, dryRun)
+					})
+
+					wg.Go(func() {
+						dock.SetupDock(config.Dock, dryRun)
+					})
+
+					wg.Wait()
+					return nil
+				},
+			},
+		},
 	}
 
-	config, err := config.LoadFromPath(context.Background(), *configFile)
-	if err != nil {
-		panic(err)
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		log.Fatal(err)
 	}
-
-	wg := new(sync.WaitGroup)
-
-	wg.Go(func() {
-		brew.SetupPackages(config.Brew, *dryRun)
-	})
-
-	wg.Go(func() {
-		nsglobaldomain.WriteConfig(config.Nsglobaldomain, *dryRun)
-	})
-
-	wg.Go(func() {
-		home.SetupConfigs(config.Home, *dryRun)
-	})
-
-	wg.Go(func() {
-		cron.SetupCronJobs(config.Cron, *dryRun)
-	})
-
-	wg.Go(func() {
-		dock.SetupDock(config.Dock, *dryRun)
-	})
-
-	wg.Wait()
 }
