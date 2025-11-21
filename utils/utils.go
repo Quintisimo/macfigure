@@ -8,12 +8,6 @@ import (
 	"reflect"
 )
 
-func PrintError(err error, logger *slog.Logger) {
-	if err != nil {
-		logger.Error(err.Error())
-	}
-}
-
 func DryRunInfo(info string, logger *slog.Logger) {
 	logger.With(slog.String("type", "dry-run")).Info(info)
 }
@@ -43,23 +37,30 @@ func RunCommand(cmd string, info string, logger *slog.Logger, dryRun bool) error
 	return nil
 }
 
-func CopyFile(source string, target string, logger *slog.Logger, dryRun bool) {
+func CopyFile(source string, target string, logger *slog.Logger, dryRun bool) error {
 	if !dryRun {
 		contents, readErr := os.ReadFile(source)
-		PrintError(readErr, logger)
+		if readErr != nil {
+			return readErr
+		}
 
 		file, createErr := os.Create(target)
-		PrintError(createErr, logger)
+		if createErr != nil {
+			return createErr
+		}
 		defer file.Close()
 
 		_, writeErr := file.Write(contents)
-		PrintError(writeErr, logger)
+		if writeErr != nil {
+			return writeErr
+		}
 	} else {
 		DryRunInfo(fmt.Sprintf("Creating %s", target), logger)
 	}
+	return nil
 }
 
-func getPropertyTypeAndValue(value reflect.Value, fieldName string) (v string, err error) {
+func getPropertyTypeAndValue(value reflect.Value, fieldName string) (string, error) {
 	switch value.Kind() {
 	case reflect.String:
 		return fmt.Sprintf("-string %s", value.String()), nil
@@ -74,7 +75,7 @@ func getPropertyTypeAndValue(value reflect.Value, fieldName string) (v string, e
 	}
 }
 
-func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, logger *slog.Logger, dryRun bool) {
+func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, logger *slog.Logger, dryRun bool) error {
 	for i := 0; i < config.NumField(); i++ {
 		fieldName := config.Type().Field(i).Tag.Get("pkl")
 
@@ -84,7 +85,9 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 
 			if !field.IsNil() {
 				strValue, err := getPropertyTypeAndValue(field.Elem(), fieldName)
-				PrintError(err, logger)
+				if err != nil {
+					return err
+				}
 				value = strValue
 			}
 
@@ -99,7 +102,10 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 			}
 
 			cmdErr := RunCommand(cmd, fmt.Sprintf("%s %s %s", msg, domain, fieldName), logger, dryRun)
-			PrintError(cmdErr, logger)
+			if cmdErr != nil {
+				return cmdErr
+			}
 		}
 	}
+	return nil
 }

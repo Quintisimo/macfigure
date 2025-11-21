@@ -9,14 +9,23 @@ import (
 	"github.com/quintisimo/macfigure/utils"
 )
 
-func SetupCronJobs(crons []cron.Cron, logger *slog.Logger, dryRun bool) {
+func SetupCronJobs(crons []cron.Cron, logger *slog.Logger, dryRun bool) error {
 	if utils.SliceHasItems(crons) {
 		cmd := ""
 		for _, cron := range crons {
-			utils.CopyFile(cron.Source, cron.Target, logger, dryRun)
+			copyFileErr := utils.CopyFile(cron.Source, cron.Target, logger, dryRun)
+			if copyFileErr != nil {
+				return copyFileErr
+			}
+
 			cmd = fmt.Sprintf("%s\n%s %s", cmd, cron.Schedule, cron.Target)
 		}
 		cmd = fmt.Sprintf("echo \"%s\" | crontab -", strings.TrimSpace(cmd))
-		utils.RunCommand(cmd, "Setting up cron jobs", logger, dryRun)
+
+		cronJobErr := utils.RunCommand(cmd, "Setting up cron jobs", logger, dryRun)
+		if cronJobErr != nil {
+			return cronJobErr
+		}
 	}
+	return nil
 }
