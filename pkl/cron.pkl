@@ -1,0 +1,9 @@
+@go.Package { name = "github.com/quintisimo/macfigure/gen/cron" }
+module macfigure.cron
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
+import "utils.pkl"
+
+schedule: utils.Schedule
+target: utils.Directory
+source: utils.Directory

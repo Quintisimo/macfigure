@@ -3,6 +3,18 @@ amends "pkl/config.pkl"
 brew {
   casks = List("zed")
 }
+cron {
+  new {
+    schedule = "0 9 * * 1-5"
+    source = "/Users/quintisimo/Github/personal/macfigure/hello.sh"
+    target = "/tmp/hello.sh"
+  }
+  new {
+    schedule = "0 9 * * 1-5"
+    source = "/Users/quintisimo/Github/personal/macfigure/hello.sh"
+    target = "/tmp/hello2.sh"
+  }
+}
 nsglobaldomain {
   AppleIconAppearanceTheme = "RegularAutomatic"
 }

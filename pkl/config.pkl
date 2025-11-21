@@ -5,9 +5,11 @@ import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
 import "brew.pkl" as brewConfig
 import "nsglobaldomain.pkl" as nsglobaldomainConfig
 import "home.pkl" as homeConfig
+import "cron.pkl" as cronConfig
 import "dock.pkl" as dockConfig
 
 brew: brewConfig
 nsglobaldomain: nsglobaldomainConfig
 home: Listing<homeConfig>
+cron: Listing<cronConfig>
 dock: dockConfig

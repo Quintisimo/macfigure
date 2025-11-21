@@ -1,4 +1,4 @@
-all: pkl run
+all: gen run
 
 gen: pkl/*.pkl
 	pkl-gen-go pkl/config.pkl

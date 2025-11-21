@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/quintisimo/macfigure/brew"
+	"github.com/quintisimo/macfigure/cron"
 	"github.com/quintisimo/macfigure/dock"
 	"github.com/quintisimo/macfigure/gen/config"
 	"github.com/quintisimo/macfigure/home"
@@ -42,6 +43,10 @@ func main() {
 
 	wg.Go(func() {
 		home.SetupConfigs(config.Home, *dryRun)
+	})
+
+	wg.Go(func() {
+		cron.SetupCronJobs(config.Cron, *dryRun)
 	})
 
 	wg.Go(func() {

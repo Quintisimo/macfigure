@@ -13,7 +13,7 @@ func PrintError(err error) {
 	}
 }
 
-func DryRunInfo(info ...string) {
+func DryRunInfo(info string) {
 	fmt.Println("[Dry Run]", info)
 }
 
@@ -37,9 +37,25 @@ func RunCommand(cmd string, info string, dryRun bool) error {
 			return err
 		}
 	} else {
-		DryRunInfo("Command:", cmd)
+		DryRunInfo(fmt.Sprintf("Command: %s", cmd))
 	}
 	return nil
+}
+
+func CopyFile(source string, target string, dryRun bool) {
+	if !dryRun {
+		contents, readErr := os.ReadFile(source)
+		PrintError(readErr)
+
+		file, createErr := os.Create(target)
+		PrintError(createErr)
+		defer file.Close()
+
+		_, writeErr := file.Write(contents)
+		PrintError(writeErr)
+	} else {
+		DryRunInfo(fmt.Sprintf("Creating %s", target))
+	}
 }
 
 func getPropertyTypeAndValue(value reflect.Value, fieldName string) (v string, err error) {
