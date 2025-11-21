@@ -2,19 +2,20 @@ package utils
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"reflect"
 )
 
-func PrintError(err error) {
+func PrintError(err error, logger *slog.Logger) {
 	if err != nil {
-		fmt.Println("[Error]", err.Error())
+		logger.Error(err.Error())
 	}
 }
 
-func DryRunInfo(info string) {
-	fmt.Println("[Dry Run]", info)
+func DryRunInfo(info string, logger *slog.Logger) {
+	logger.With(slog.String("type", "dry-run")).Info(info)
 }
 
 func SliceHasItems[I any](slice []I) bool {
@@ -29,7 +30,7 @@ func GetConfigPath() string {
 	return fmt.Sprintf("%s/macfigure/config.pkl", homeDir)
 }
 
-func RunCommand(cmd string, info string, dryRun bool) error {
+func RunCommand(cmd string, info string, logger *slog.Logger, dryRun bool) error {
 	if !dryRun {
 		fmt.Println(info)
 		command := exec.Command(cmd)
@@ -37,24 +38,24 @@ func RunCommand(cmd string, info string, dryRun bool) error {
 			return err
 		}
 	} else {
-		DryRunInfo(fmt.Sprintf("Command: %s", cmd))
+		DryRunInfo(fmt.Sprintf("Running %s", cmd), logger)
 	}
 	return nil
 }
 
-func CopyFile(source string, target string, dryRun bool) {
+func CopyFile(source string, target string, logger *slog.Logger, dryRun bool) {
 	if !dryRun {
 		contents, readErr := os.ReadFile(source)
-		PrintError(readErr)
+		PrintError(readErr, logger)
 
 		file, createErr := os.Create(target)
-		PrintError(createErr)
+		PrintError(createErr, logger)
 		defer file.Close()
 
 		_, writeErr := file.Write(contents)
-		PrintError(writeErr)
+		PrintError(writeErr, logger)
 	} else {
-		DryRunInfo(fmt.Sprintf("Creating %s", target))
+		DryRunInfo(fmt.Sprintf("Creating %s", target), logger)
 	}
 }
 
@@ -73,7 +74,7 @@ func getPropertyTypeAndValue(value reflect.Value, fieldName string) (v string, e
 	}
 }
 
-func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, dryRun bool) {
+func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, logger *slog.Logger, dryRun bool) {
 	for i := 0; i < config.NumField(); i++ {
 		fieldName := config.Type().Field(i).Tag.Get("pkl")
 
@@ -83,7 +84,7 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 
 			if !field.IsNil() {
 				strValue, err := getPropertyTypeAndValue(field.Elem(), fieldName)
-				PrintError(err)
+				PrintError(err, logger)
 				value = strValue
 			}
 
@@ -97,8 +98,8 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 				msg = "Deleting"
 			}
 
-			cmdErr := RunCommand(cmd, fmt.Sprintf("%s %s %s", msg, domain, fieldName), dryRun)
-			PrintError(cmdErr)
+			cmdErr := RunCommand(cmd, fmt.Sprintf("%s %s %s", msg, domain, fieldName), logger, dryRun)
+			PrintError(cmdErr, logger)
 		}
 	}
 }

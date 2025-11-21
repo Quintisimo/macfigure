@@ -2,6 +2,7 @@ package dock
 
 import (
 	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 
@@ -65,9 +66,9 @@ func getInfoMsg(path string) string {
 	return fmt.Sprintf("Add %s to Dock", name)
 }
 
-func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, dryRun bool) {
-	delErr := utils.RunCommand(rmCmd, clrMsg, dryRun)
-	utils.PrintError(delErr)
+func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, logger *slog.Logger, dryRun bool) {
+	delErr := utils.RunCommand(rmCmd, clrMsg, logger, dryRun)
+	utils.PrintError(delErr, logger)
 
 	if utils.SliceHasItems(items) {
 		for _, path := range items {
@@ -86,28 +87,28 @@ func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg strin
 				cmd = fmt.Sprintf(`%s "%s"`, cmdPrefix, xml)
 			}
 
-			cmdErr := utils.RunCommand(cmd, getInfoMsg(path), dryRun)
-			utils.PrintError(cmdErr)
+			cmdErr := utils.RunCommand(cmd, getInfoMsg(path), logger, dryRun)
+			utils.PrintError(cmdErr, logger)
 		}
 
 	}
 }
 
-func SetupDock(config dock.Dock, dryRun bool) {
+func SetupDock(config dock.Dock, logger *slog.Logger, dryRun bool) {
 	const addCmd = "defaults write com.apple.dock"
 	const rmCmd = "defaults delete com.apple.dock"
 
 	const appsCmd = "persistent-apps"
 	appsAddCmd := fmt.Sprintf("%s %s", addCmd, appsCmd)
 	appsRmCmd := fmt.Sprintf("%s %s", rmCmd, appsCmd)
-	updateDockItems(config.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", dryRun)
+	updateDockItems(config.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", logger, dryRun)
 
 	const folderCmd = "persistent-others"
 	foldersAddCmd := fmt.Sprintf("%s %s", addCmd, folderCmd)
 	foldersRmCmd := fmt.Sprintf("%s %s", rmCmd, folderCmd)
-	updateDockItems(config.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", dryRun)
+	updateDockItems(config.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", logger, dryRun)
 
-	utils.WriteConfig(reflect.ValueOf(config), "com.apple.dock", addCmd, rmCmd, dryRun)
+	utils.WriteConfig(reflect.ValueOf(config), "com.apple.dock", addCmd, rmCmd, logger, dryRun)
 
-	utils.RunCommand("killall Dock", "Restart Dock to apply changes", dryRun)
+	utils.RunCommand("killall Dock", "Restart Dock to apply changes", logger, dryRun)
 }

@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/apple/pkl-go v0.11.1
+	github.com/lmittmann/tint v1.1.2
 	github.com/urfave/cli/v3 v3.6.1
 )
 

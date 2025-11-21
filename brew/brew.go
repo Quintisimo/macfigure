@@ -3,6 +3,7 @@ package brew
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/quintisimo/macfigure/gen/brew"
@@ -31,21 +32,21 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 	return nil
 }
 
-func SetupPackages(config brew.Brew, dryRun bool) {
+func SetupPackages(config brew.Brew, logger *slog.Logger, dryRun bool) {
 	file, err := os.CreateTemp("", "brew")
-	utils.PrintError(err)
+	utils.PrintError(err, logger)
 
 	defer file.Close()
 	defer os.Remove(file.Name())
 
 	formulaErr := writeBrewFileLines(file, "formula", config.Formulas)
-	utils.PrintError(formulaErr)
+	utils.PrintError(formulaErr, logger)
 
 	caskErr := writeBrewFileLines(file, "cask", config.Casks)
-	utils.PrintError(caskErr)
+	utils.PrintError(caskErr, logger)
 
 	cmd := fmt.Sprintf("brew bundle --cleanup zap --file=%s", file.Name())
 
-	cmdErr := utils.RunCommand(cmd, "Running homebrew cli", dryRun)
-	utils.PrintError(cmdErr)
+	cmdErr := utils.RunCommand(cmd, "Running homebrew cli", logger, dryRun)
+	utils.PrintError(cmdErr, logger)
 }

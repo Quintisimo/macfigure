@@ -2,10 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"log/slog"
+	"maps"
 	"os"
+	"slices"
+	"strings"
 	"sync"
 
+	"github.com/lmittmann/tint"
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/cron"
 	"github.com/quintisimo/macfigure/dock"
@@ -17,25 +23,49 @@ import (
 )
 
 func main() {
+	defaultLogLevel := "info"
+	logLevel := map[string]slog.Level{
+		"debug":         slog.LevelDebug,
+		defaultLogLevel: slog.LevelInfo,
+		"warn":          slog.LevelWarn,
+		"error":         slog.LevelError,
+	}
+	logLevelKeys := slices.Collect(maps.Keys(logLevel))
+
 	cmd := &cli.Command{
 		Name:  "macfigure",
 		Usage: "A tool to manage macOS configurations",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:  "dry-run",
-				Value: true,
-				Usage: "Perform a dry run without making any changes",
+				Name:    "dry-run",
+				Aliases: []string{"d"},
+				Value:   true,
+				Usage:   "Perform a dry run without making any changes",
 			},
 		},
 		Commands: []*cli.Command{
 			{
-				Name:  "sync",
-				Usage: "Sync system with config",
+				Name:    "sync",
+				Usage:   "Sync system with config",
+				Aliases: []string{"s"},
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:  "config",
-						Usage: "Path to the configuration file",
-						Value: utils.GetConfigPath(),
+						Name:    "config",
+						Aliases: []string{"c"},
+						Usage:   "Path to the configuration `file`",
+						Value:   utils.GetConfigPath(),
+					},
+					&cli.StringFlag{
+						Name:    "loglevel",
+						Aliases: []string{"l"},
+						Usage:   fmt.Sprintf("Set log level, can be `%s`", strings.Join(logLevelKeys, ", ")),
+						Value:   defaultLogLevel,
+						Validator: func(s string) error {
+							if !slices.Contains(logLevelKeys, s) {
+								return fmt.Errorf("invalid log level: %s", s)
+							}
+							return nil
+						},
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -47,26 +77,38 @@ func main() {
 						panic(err)
 					}
 
+					logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+						Level: logLevel[cmd.String("loglevel")],
+					}))
+					createLoggerWithSection := func(section string) *slog.Logger {
+						return logger.With(slog.String("section", section))
+					}
+
 					wg := new(sync.WaitGroup)
 
 					wg.Go(func() {
-						brew.SetupPackages(config.Brew, dryRun)
+						brewLogger := createLoggerWithSection("brew")
+						brew.SetupPackages(config.Brew, brewLogger, dryRun)
 					})
 
 					wg.Go(func() {
-						nsglobaldomain.WriteConfig(config.Nsglobaldomain, dryRun)
+						nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
+						nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
 					})
 
 					wg.Go(func() {
-						home.SetupConfigs(config.Home, dryRun)
+						homeLogger := createLoggerWithSection("home")
+						home.SetupConfigs(config.Home, homeLogger, dryRun)
 					})
 
 					wg.Go(func() {
-						cron.SetupCronJobs(config.Cron, dryRun)
+						cronLogger := createLoggerWithSection("cron")
+						cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
 					})
 
 					wg.Go(func() {
-						dock.SetupDock(config.Dock, dryRun)
+						dockerLogger := createLoggerWithSection("dock")
+						dock.SetupDock(config.Dock, dockerLogger, dryRun)
 					})
 
 					wg.Wait()
