@@ -24,13 +24,13 @@ import (
 
 func main() {
 	defaultLogLevel := "info"
-	logLevel := map[string]slog.Level{
+	logLevels := map[string]slog.Level{
 		"debug":         slog.LevelDebug,
 		defaultLogLevel: slog.LevelInfo,
 		"warn":          slog.LevelWarn,
 		"error":         slog.LevelError,
 	}
-	logLevelKeys := slices.Collect(maps.Keys(logLevel))
+	logLevelKeys := slices.Collect(maps.Keys(logLevels))
 
 	cmd := &cli.Command{
 		Name:  "macfigure",
@@ -72,47 +72,48 @@ func main() {
 					dryRun := cmd.Bool("dry-run")
 					configFile := cmd.String("config")
 
-					config, err := config.LoadFromPath(context.Background(), configFile)
-					if err != nil {
-						panic(err)
+					config, configErr := config.LoadFromPath(context.Background(), configFile)
+					if configErr != nil {
+						panic(configErr)
 					}
 
 					logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-						Level: logLevel[cmd.String("loglevel")],
+						Level: logLevels[cmd.String("loglevel")],
 					}))
 					createLoggerWithSection := func(section string) *slog.Logger {
 						return logger.With(slog.String("section", section))
 					}
 
+					var setupErr error
 					wg := new(sync.WaitGroup)
 
 					wg.Go(func() {
 						brewLogger := createLoggerWithSection("brew")
-						brew.SetupPackages(config.Brew, brewLogger, dryRun)
+						setupErr = brew.SetupPackages(config.Brew, brewLogger, dryRun)
 					})
 
 					wg.Go(func() {
 						nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
-						nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
+						setupErr = nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
 					})
 
 					wg.Go(func() {
 						homeLogger := createLoggerWithSection("home")
-						home.SetupConfigs(config.Home, homeLogger, dryRun)
+						setupErr = home.SetupConfigs(config.Home, homeLogger, dryRun)
 					})
 
 					wg.Go(func() {
 						cronLogger := createLoggerWithSection("cron")
-						cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
+						setupErr = cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
 					})
 
 					wg.Go(func() {
 						dockerLogger := createLoggerWithSection("dock")
-						dock.SetupDock(config.Dock, dockerLogger, dryRun)
+						setupErr = dock.SetupDock(config.Dock, dockerLogger, dryRun)
 					})
 
 					wg.Wait()
-					return nil
+					return setupErr
 				},
 			},
 		},

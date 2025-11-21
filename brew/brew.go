@@ -32,21 +32,30 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 	return nil
 }
 
-func SetupPackages(config brew.Brew, logger *slog.Logger, dryRun bool) {
+func SetupPackages(config brew.Brew, logger *slog.Logger, dryRun bool) error {
 	file, err := os.CreateTemp("", "brew")
-	utils.PrintError(err, logger)
+	if err != nil {
+		return err
+	}
 
 	defer file.Close()
 	defer os.Remove(file.Name())
 
 	formulaErr := writeBrewFileLines(file, "formula", config.Formulas)
-	utils.PrintError(formulaErr, logger)
+	if formulaErr != nil {
+		return formulaErr
+	}
 
 	caskErr := writeBrewFileLines(file, "cask", config.Casks)
-	utils.PrintError(caskErr, logger)
+	if caskErr != nil {
+		return caskErr
+	}
 
 	cmd := fmt.Sprintf("brew bundle --cleanup zap --file=%s", file.Name())
 
 	cmdErr := utils.RunCommand(cmd, "Running homebrew cli", logger, dryRun)
-	utils.PrintError(cmdErr, logger)
+	if cmdErr != nil {
+		return cmdErr
+	}
+	return nil
 }
