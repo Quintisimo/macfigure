@@ -33,7 +33,7 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 }
 
 func SetupPackages(config brew.Brew, logger *slog.Logger, dryRun bool) error {
-	file, err := os.CreateTemp("", "brew")
+	file, err := os.CreateTemp("", "brewfile-*.Brewfile")
 	if err != nil {
 		return err
 	}

@@ -7,9 +7,11 @@ import "nsglobaldomain.pkl" as nsglobaldomainConfig
 import "home.pkl" as homeConfig
 import "cron.pkl" as cronConfig
 import "dock.pkl" as dockConfig
+import "utils.pkl"
 
 brew: brewConfig
 nsglobaldomain: nsglobaldomainConfig
 home: Listing<homeConfig>
 cron: Listing<cronConfig>
 dock: dockConfig
+env: List<utils.Secret>
