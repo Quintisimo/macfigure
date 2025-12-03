@@ -2,14 +2,14 @@ package cron
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
+	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/cron"
 	"github.com/quintisimo/macfigure/utils"
 )
 
-func SetupCronJobs(crons []cron.Cron, logger *slog.Logger, dryRun bool) error {
+func SetupCronJobs(crons []cron.Cron, logger *log.Logger, dryRun bool) error {
 	if utils.SliceHasItems(crons) {
 		cmd := ""
 		for _, cron := range crons {

@@ -2,14 +2,15 @@ package utils
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"reflect"
+
+	"github.com/charmbracelet/log"
 )
 
-func DryRunInfo(info string, logger *slog.Logger) {
-	logger.With(slog.String("type", "dry-run")).Info(info)
+func DryRunInfo(info string, logger *log.Logger) {
+	logger.With("type", "dry-run").Info(info)
 }
 
 func SliceHasItems[I any](slice []I) bool {
@@ -24,7 +25,7 @@ func GetConfigPath() string {
 	return fmt.Sprintf("%s/macfigure/config.pkl", homeDir)
 }
 
-func RunCommand(cmd string, info string, logger *slog.Logger, dryRun bool) error {
+func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error {
 	if !dryRun {
 		fmt.Println(info)
 		command := exec.Command(cmd)
@@ -37,7 +38,7 @@ func RunCommand(cmd string, info string, logger *slog.Logger, dryRun bool) error
 	return nil
 }
 
-func CopyFile(source string, target string, logger *slog.Logger, dryRun bool) error {
+func CopyFile(source string, target string, logger *log.Logger, dryRun bool) error {
 	if !dryRun {
 		contents, readErr := os.ReadFile(source)
 		if readErr != nil {
@@ -75,7 +76,7 @@ func getPropertyTypeAndValue(value reflect.Value, fieldName string) (string, err
 	}
 }
 
-func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, logger *slog.Logger, dryRun bool) error {
+func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd string, logger *log.Logger, dryRun bool) error {
 	for i := 0; i < config.NumField(); i++ {
 		fieldName := config.Type().Field(i).Tag.Get("pkl")
 

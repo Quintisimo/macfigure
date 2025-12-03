@@ -3,9 +3,9 @@ package brew
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/brew"
 	"github.com/quintisimo/macfigure/utils"
 )
@@ -32,7 +32,7 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 	return nil
 }
 
-func SetupPackages(config brew.Brew, logger *slog.Logger, dryRun bool) error {
+func SetupPackages(config brew.Brew, logger *log.Logger, dryRun bool) error {
 	file, err := os.CreateTemp("", "brewfile-*.Brewfile")
 	if err != nil {
 		return err

@@ -2,10 +2,10 @@ package dock
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 	"strings"
 
+	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/dock"
 	"github.com/quintisimo/macfigure/utils"
 )
@@ -66,7 +66,7 @@ func getInfoMsg(path string) string {
 	return fmt.Sprintf("Add %s to Dock", name)
 }
 
-func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, logger *slog.Logger, dryRun bool) error {
+func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, logger *log.Logger, dryRun bool) error {
 	delErr := utils.RunCommand(rmCmd, clrMsg, logger, dryRun)
 	if delErr != nil {
 		return delErr
@@ -98,7 +98,7 @@ func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg strin
 	return nil
 }
 
-func SetupDock(config dock.Dock, logger *slog.Logger, dryRun bool) error {
+func SetupDock(config dock.Dock, logger *log.Logger, dryRun bool) error {
 	const addCmd = "defaults write com.apple.dock"
 	const rmCmd = "defaults delete com.apple.dock"
 

@@ -3,15 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"log/slog"
 	"maps"
 	"os"
 	"slices"
 	"strings"
 	"sync"
 
-	"github.com/lmittmann/tint"
+	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/cron"
 	"github.com/quintisimo/macfigure/dock"
@@ -30,11 +28,11 @@ func loadConfig(cmd *cli.Command) (config.Config, error) {
 
 func main() {
 	defaultLogLevel := "info"
-	logLevels := map[string]slog.Level{
-		"debug":         slog.LevelDebug,
-		defaultLogLevel: slog.LevelInfo,
-		"warn":          slog.LevelWarn,
-		"error":         slog.LevelError,
+	logLevels := map[string]log.Level{
+		"debug":         log.DebugLevel,
+		defaultLogLevel: log.InfoLevel,
+		"warn":          log.WarnLevel,
+		"error":         log.ErrorLevel,
 	}
 	logLevelKeys := slices.Collect(maps.Keys(logLevels))
 
@@ -82,11 +80,10 @@ func main() {
 						return configErr
 					}
 
-					logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-						Level: logLevels[cmd.String("loglevel")],
-					}))
-					createLoggerWithSection := func(section string) *slog.Logger {
-						return logger.With(slog.String("section", section))
+					logger := log.New(os.Stderr)
+					logger.SetLevel(logLevels[cmd.String("loglevel")])
+					createLoggerWithSection := func(section string) *log.Logger {
+						return logger.With("section", section)
 					}
 
 					var setupErr error
