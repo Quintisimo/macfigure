@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/cron"
@@ -73,49 +74,56 @@ func main() {
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					dryRun := cmd.Bool("dry-run")
+					err := spinner.New().
+						Title("Applying config...").
+						ActionWithErr(func(context.Context) error {
+							dryRun := cmd.Bool("dry-run")
 
-					config, configErr := loadConfig(cmd)
-					if configErr != nil {
-						return configErr
-					}
+							config, configErr := loadConfig(cmd)
+							if configErr != nil {
+								return configErr
+							}
 
-					logger := log.New(os.Stderr)
-					logger.SetLevel(logLevels[cmd.String("loglevel")])
-					createLoggerWithSection := func(section string) *log.Logger {
-						return logger.With("section", section)
-					}
+							logger := log.New(os.Stderr)
+							logger.SetLevel(logLevels[cmd.String("loglevel")])
+							createLoggerWithSection := func(section string) *log.Logger {
+								return logger.With("section", section)
+							}
 
-					var setupErr error
-					wg := new(sync.WaitGroup)
+							var setupErr error
+							wg := new(sync.WaitGroup)
 
-					wg.Go(func() {
-						brewLogger := createLoggerWithSection("brew")
-						setupErr = brew.SetupPackages(config.Brew, brewLogger, dryRun)
-					})
+							wg.Go(func() {
+								brewLogger := createLoggerWithSection("brew")
+								setupErr = brew.SetupPackages(config.Brew, brewLogger, dryRun)
+							})
 
-					wg.Go(func() {
-						nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
-						setupErr = nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
-					})
+							wg.Go(func() {
+								nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
+								setupErr = nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
+							})
 
-					wg.Go(func() {
-						homeLogger := createLoggerWithSection("home")
-						setupErr = home.SetupConfigs(config.Home, homeLogger, dryRun)
-					})
+							wg.Go(func() {
+								homeLogger := createLoggerWithSection("home")
+								setupErr = home.SetupConfigs(config.Home, homeLogger, dryRun)
+							})
 
-					wg.Go(func() {
-						cronLogger := createLoggerWithSection("cron")
-						setupErr = cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
-					})
+							wg.Go(func() {
+								cronLogger := createLoggerWithSection("cron")
+								setupErr = cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
+							})
 
-					wg.Go(func() {
-						dockerLogger := createLoggerWithSection("dock")
-						setupErr = dock.SetupDock(config.Dock, dockerLogger, dryRun)
-					})
+							wg.Go(func() {
+								dockerLogger := createLoggerWithSection("dock")
+								setupErr = dock.SetupDock(config.Dock, dockerLogger, dryRun)
+							})
 
-					wg.Wait()
-					return setupErr
+							wg.Wait()
+							return setupErr
+						}).
+						Run()
+
+					return err
 				},
 			},
 			{
