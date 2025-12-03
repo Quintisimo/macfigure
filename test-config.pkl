@@ -22,7 +22,7 @@ dock {
   apps = List("/Applications/Zed.app", "spacer", "small-spacer")
   `show-recents` = false
 }
-env {
+secret {
   new {
     source = "./secrets.age"
     target = "/tmp/secrets.age"

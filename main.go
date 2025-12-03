@@ -15,10 +15,10 @@ import (
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/cron"
 	"github.com/quintisimo/macfigure/dock"
-	"github.com/quintisimo/macfigure/env"
 	"github.com/quintisimo/macfigure/gen/config"
 	"github.com/quintisimo/macfigure/home"
 	"github.com/quintisimo/macfigure/nsglobaldomain"
+	"github.com/quintisimo/macfigure/secret"
 	"github.com/quintisimo/macfigure/utils"
 	"github.com/urfave/cli/v3"
 )
@@ -122,24 +122,21 @@ func main() {
 				},
 			},
 			{
-				Name:    "env",
-				Usage:   "Manage environment variables with age",
-				Aliases: []string{"e"},
+				Name:  "secret",
+				Usage: "Manage secrets with age",
 				Commands: []*cli.Command{
 					{
-						Name:    "generate",
-						Usage:   "Generate age key and store it in the macOS keychain",
-						Aliases: []string{"g"},
+						Name:  "generate",
+						Usage: "Generate age key and store it in the macOS keychain",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							return env.GenerateKeys()
+							return secret.GenerateKeys()
 						},
 					},
 					{
-						Name:    "retrieve",
-						Usage:   "Retrieve the stored age public key from the macOS keychain",
-						Aliases: []string{"r"},
+						Name:  "retrieve",
+						Usage: "Retrieve the stored age public key from the macOS keychain",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							publicKey, privateKey, err := env.GetKeys()
+							publicKey, privateKey, err := secret.GetKeys()
 							if err != nil {
 								return err
 							}
@@ -150,22 +147,21 @@ func main() {
 						},
 					},
 					{
-						Name:    "edit",
-						Usage:   "Edit environment variables file",
-						Aliases: []string{"e"},
+						Name:  "edit",
+						Usage: "Edit a secrets file",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							config, configErr := loadConfig(cmd)
 							if configErr != nil {
 								return configErr
 							}
 
-							envPath, envErr := env.List(config.Env)
-							if envErr != nil {
-								return envErr
+							secretPath, secretErr := secret.List(config.Secret)
+							if secretErr != nil {
+								return secretErr
 							}
 
-							if envPath != "" {
-								return env.Edit(envPath)
+							if secretPath != "" {
+								return secret.Edit(secretPath)
 							}
 
 							return nil

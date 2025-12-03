@@ -1,7 +1,6 @@
-package env
+package secret
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -9,13 +8,13 @@ import (
 	"filippo.io/age"
 )
 
-func openEnvFile(envFileName string, privateKey string) (string, error) {
+func openSecretFile(secretFileName string, privateKey string) (string, error) {
 	identity, identityErr := age.ParseX25519Identity(privateKey)
 	if identityErr != nil {
 		return "", identityErr
 	}
 
-	file, fileErr := os.Open(envFileName)
+	file, fileErr := os.Open(secretFileName)
 	if fileErr != nil {
 		return "", fileErr
 	}
@@ -26,7 +25,7 @@ func openEnvFile(envFileName string, privateKey string) (string, error) {
 		return "", readerErr
 	}
 
-	tempFile, tempFileErr := os.CreateTemp("", "env-edit-*.txt")
+	tempFile, tempFileErr := os.CreateTemp("", "secret-edit-*.txt")
 	if tempFileErr != nil {
 		return "", tempFileErr
 	}
@@ -38,7 +37,7 @@ func openEnvFile(envFileName string, privateKey string) (string, error) {
 	return tempFile.Name(), nil
 }
 
-func editEnvFile(tempFileName string) (string, error) {
+func editSecretFile(tempFileName string) (string, error) {
 	editor := "vim"
 	cmd := exec.Command(editor, tempFileName)
 	cmd.Stdin = os.Stdin
@@ -61,19 +60,19 @@ func editEnvFile(tempFileName string) (string, error) {
 	return string(contents), nil
 }
 
-func saveEnvFile(contents string, envFileName string, publicKey string) error {
+func saveSecretFile(contents string, secretFileName string, publicKey string) error {
 	recipient, recipientErr := age.ParseX25519Recipient(publicKey)
 	if recipientErr != nil {
 		return recipientErr
 	}
 
-	env, envErr := os.Create(envFileName)
-	if envErr != nil {
-		return envErr
+	secret, secretErr := os.Create(secretFileName)
+	if secretErr != nil {
+		return secretErr
 	}
-	defer env.Close()
+	defer secret.Close()
 
-	writer, writerErr := age.Encrypt(env, recipient)
+	writer, writerErr := age.Encrypt(secret, recipient)
 	if writerErr != nil {
 		return writerErr
 	}
@@ -89,32 +88,30 @@ func saveEnvFile(contents string, envFileName string, publicKey string) error {
 	return nil
 }
 
-func Edit(envFileName string) error {
+func Edit(secretFileName string) error {
 	publicKey, privateKey, getErr := GetKeys()
 	if getErr != nil {
 		return getErr
 	}
 
-	if _, statErr := os.Stat(envFileName); os.IsNotExist(statErr) {
-		fmt.Println("Env file does not exist. Creating new env file:", envFileName)
-		if saveErr := saveEnvFile("", envFileName, publicKey); saveErr != nil {
-			fmt.Println("Error creating new env file:", envFileName)
+	if _, statErr := os.Stat(secretFileName); os.IsNotExist(statErr) {
+		if saveErr := saveSecretFile("", secretFileName, publicKey); saveErr != nil {
 			return saveErr
 		}
 	}
 
-	tempFileName, tempFileErr := openEnvFile(envFileName, privateKey)
+	tempFileName, tempFileErr := openSecretFile(secretFileName, privateKey)
 	if tempFileErr != nil {
 		return tempFileErr
 	}
 	defer os.Remove(tempFileName)
 
-	contents, editErr := editEnvFile(tempFileName)
+	contents, editErr := editSecretFile(tempFileName)
 	if editErr != nil {
 		return editErr
 	}
 
-	if saveErr := saveEnvFile(contents, envFileName, publicKey); saveErr != nil {
+	if saveErr := saveSecretFile(contents, secretFileName, publicKey); saveErr != nil {
 		return saveErr
 	}
 
