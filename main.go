@@ -15,7 +15,7 @@ import (
 	"github.com/quintisimo/macfigure/brew"
 	"github.com/quintisimo/macfigure/cron"
 	"github.com/quintisimo/macfigure/dock"
-	"github.com/quintisimo/macfigure/envs"
+	"github.com/quintisimo/macfigure/env"
 	"github.com/quintisimo/macfigure/gen/config"
 	"github.com/quintisimo/macfigure/home"
 	"github.com/quintisimo/macfigure/nsglobaldomain"
@@ -131,7 +131,7 @@ func main() {
 						Usage:   "Generate age key and store it in the macOS keychain",
 						Aliases: []string{"g"},
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							return envs.GenerateKeys()
+							return env.GenerateKeys()
 						},
 					},
 					{
@@ -139,7 +139,7 @@ func main() {
 						Usage:   "Retrieve the stored age public key from the macOS keychain",
 						Aliases: []string{"r"},
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							publicKey, privateKey, err := envs.GetKeys()
+							publicKey, privateKey, err := env.GetKeys()
 							if err != nil {
 								return err
 							}
@@ -159,7 +159,16 @@ func main() {
 								return configErr
 							}
 
-							return envs.Edit(config.Env[0])
+							envPath, envErr := env.List(config.Env)
+							if envErr != nil {
+								return envErr
+							}
+
+							if envPath != "" {
+								return env.Edit(envPath)
+							}
+
+							return nil
 						},
 					},
 				},

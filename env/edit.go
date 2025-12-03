@@ -1,56 +1,13 @@
-package envs
+package env
 
 import (
-	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 
 	"filippo.io/age"
-	"github.com/zalando/go-keyring"
 )
-
-const serviceName = "macfigureAge"
-const privateKeyName = serviceName + "PrivateKey"
-const publicKeyName = serviceName + "PublicKey"
-
-func GetKeys() (publicKey string, privateKey string, error error) {
-	publicKey, publicKeyErr := keyring.Get(serviceName, publicKeyName)
-	if publicKeyErr != nil {
-		return "", "", publicKeyErr
-	}
-
-	privateKey, privateKeyErr := keyring.Get(serviceName, privateKeyName)
-	if privateKeyErr != nil {
-		return "", "", privateKeyErr
-	}
-
-	return publicKey, privateKey, nil
-}
-
-func GenerateKeys() error {
-	_, _, err := GetKeys()
-	if err == nil {
-		return errors.New("Keys already exist in keychain")
-	}
-
-	identity, generationErr := age.GenerateX25519Identity()
-	if generationErr != nil {
-		return generationErr
-	}
-
-	privateKeySaveErr := keyring.Set(serviceName, publicKeyName, identity.Recipient().String())
-	if privateKeySaveErr != nil {
-		return privateKeySaveErr
-	}
-
-	publicKeySaveErr := keyring.Set(serviceName, privateKeyName, identity.String())
-	if publicKeySaveErr != nil {
-		return publicKeySaveErr
-	}
-
-	return nil
-}
 
 func openEnvFile(envFileName string, privateKey string) (string, error) {
 	identity, identityErr := age.ParseX25519Identity(privateKey)
@@ -139,7 +96,11 @@ func Edit(envFileName string) error {
 	}
 
 	if _, statErr := os.Stat(envFileName); os.IsNotExist(statErr) {
-		saveEnvFile("", envFileName, publicKey)
+		fmt.Println("Env file does not exist. Creating new env file:", envFileName)
+		if saveErr := saveEnvFile("", envFileName, publicKey); saveErr != nil {
+			fmt.Println("Error creating new env file:", envFileName)
+			return saveErr
+		}
 	}
 
 	tempFileName, tempFileErr := openEnvFile(envFileName, privateKey)
