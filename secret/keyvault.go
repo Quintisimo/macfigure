@@ -1,9 +1,8 @@
 package secret
 
 import (
-	"errors"
-
 	"filippo.io/age"
+	"github.com/charmbracelet/huh"
 	"github.com/zalando/go-keyring"
 )
 
@@ -26,9 +25,37 @@ func GetKeys() (publicKey string, privateKey string, error error) {
 }
 
 func GenerateKeys() error {
+	regenerateKeys := false
+
 	_, _, err := GetKeys()
 	if err == nil {
-		return errors.New("Keys already exist in keychain")
+		confirmErr := huh.NewConfirm().
+			Title("Secret keys already exist in the keychain, do you want to regenerate them?").
+			Affirmative("Yes!").
+			Negative("No.").
+			Value(&regenerateKeys).
+			Run()
+
+		if confirmErr != nil {
+			return confirmErr
+		}
+	}
+
+	if regenerateKeys {
+		confirmAgainErr := huh.NewConfirm().
+			Title("Are you sure? If you currently have secrets encrypted with the old keys you will not be able to decrypt them").
+			Affirmative("Yes!").
+			Negative("No.").
+			Value(&regenerateKeys).
+			Run()
+
+		if confirmAgainErr != nil {
+			return confirmAgainErr
+		}
+	}
+
+	if !regenerateKeys {
+		return nil
 	}
 
 	identity, generationErr := age.GenerateX25519Identity()

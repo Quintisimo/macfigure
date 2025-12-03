@@ -27,7 +27,7 @@ func GetConfigPath() string {
 
 func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error {
 	if !dryRun {
-		fmt.Println(info)
+		log.Info(info)
 		command := exec.Command(cmd)
 		if err := command.Run(); err != nil {
 			return err

@@ -131,24 +131,30 @@ func main() {
 				Usage: "Manage secrets with age",
 				Commands: []*cli.Command{
 					{
-						Name:  "generate",
-						Usage: "Generate age key and store it in the macOS keychain",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							return secret.GenerateKeys()
-						},
-					},
-					{
-						Name:  "retrieve",
-						Usage: "Retrieve the stored age public key from the macOS keychain",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							publicKey, privateKey, err := secret.GetKeys()
-							if err != nil {
-								return err
-							}
+						Name:  "key",
+						Usage: "Manage age keys in the macOS keychain",
+						Commands: []*cli.Command{
+							{
+								Name:  "generate",
+								Usage: "Generate age key and store it in the macOS keychain",
+								Action: func(ctx context.Context, cmd *cli.Command) error {
+									return secret.GenerateKeys()
+								},
+							},
+							{
+								Name:  "get",
+								Usage: "Get the stored age public key from the macOS keychain",
+								Action: func(ctx context.Context, cmd *cli.Command) error {
+									publicKey, privateKey, err := secret.GetKeys()
+									if err != nil {
+										return err
+									}
 
-							fmt.Printf("Public key: %s\n", publicKey)
-							fmt.Printf("Private key: %s\n", privateKey)
-							return nil
+									fmt.Printf("Public key: %s\n", publicKey)
+									fmt.Printf("Private key: %s\n", privateKey)
+									return nil
+								},
+							},
 						},
 					},
 					{
