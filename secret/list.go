@@ -1,4 +1,4 @@
-package env
+package secret
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/quintisimo/macfigure/gen/env"
+	"github.com/quintisimo/macfigure/gen/secret"
 )
 
 const listHeight = 14
@@ -89,27 +89,27 @@ func (m listModel) View() string {
 	return "\n" + m.list.View()
 }
 
-func List(env []env.Env) (string, error) {
+func List(secret []secret.Secret) (string, error) {
 	const defaultWidth = 20
 
-	envPath := ""
-	envLen := len(env)
+	secretPath := ""
+	secretLen := len(secret)
 
-	if envLen == 0 {
+	if secretLen == 0 {
 		return "", nil
 	}
 
-	if envLen == 1 {
-		return env[0].Source, nil
+	if secretLen == 1 {
+		return secret[0].Source, nil
 	}
 
-	items := make([]list.Item, envLen)
-	for i, envItem := range env {
-		items[i] = item(envItem.Source)
+	items := make([]list.Item, secretLen)
+	for i, secretItem := range secret {
+		items[i] = item(secretItem.Source)
 	}
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	l.Title = "Select environment to edit"
+	l.Title = "Select secret to edit"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle
@@ -121,7 +121,7 @@ func List(env []env.Env) (string, error) {
 	if runErr != nil {
 		return "", runErr
 	}
-	envPath = runModel.(listModel).choice
+	secretPath = runModel.(listModel).choice
 
-	return envPath, nil
+	return secretPath, nil
 }

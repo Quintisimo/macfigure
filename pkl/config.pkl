@@ -7,11 +7,11 @@ import "nsglobaldomain.pkl" as nsglobaldomainConfig
 import "home.pkl" as homeConfig
 import "cron.pkl" as cronConfig
 import "dock.pkl" as dockConfig
-import "env.pkl" as envConfig
+import "secret.pkl" as secretConfig
 
 brew: brewConfig
 nsglobaldomain: nsglobaldomainConfig
 home: Listing<homeConfig>
 cron: Listing<cronConfig>
 dock: dockConfig
-env: Listing<envConfig>
+secret: Listing<secretConfig>
