@@ -1,4 +1,7 @@
-typealias Directory = String(startsWith("/"))
+const pathRegex = Regex("/|~|\\.\\./|\\./")
+const cronRegex = Regex(#"^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)$"#)
+
+typealias Directory = String(startsWith(pathRegex))
 typealias AppPath = String(startsWith("/Applications"), endsWith(".app"))
-typealias Schedule = String(matches(Regex(#"^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)$"#)))
-typealias Secret = String(startsWith("/"), endsWith(".age"))
+typealias Schedule = String(matches(cronRegex))
+typealias Secret = String(startsWith(pathRegex), endsWith(".age"))
