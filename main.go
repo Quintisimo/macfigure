@@ -7,7 +7,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"sync"
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
@@ -20,6 +19,7 @@ import (
 	"github.com/quintisimo/macfigure/secret"
 	"github.com/quintisimo/macfigure/utils"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 func loadConfig(cmd *cli.Command) (config.Config, error) {
@@ -90,36 +90,34 @@ func main() {
 								return logger.With("section", section)
 							}
 
-							var setupErr error
-							wg := new(sync.WaitGroup)
+							wg := new(errgroup.Group)
 
-							wg.Go(func() {
+							wg.Go(func() error {
 								brewLogger := createLoggerWithSection("brew")
-								setupErr = brew.SetupPackages(config.Brew, brewLogger, dryRun)
+								return brew.SetupPackages(config.Brew, brewLogger, dryRun)
 							})
 
-							wg.Go(func() {
+							wg.Go(func() error {
 								nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
-								setupErr = nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
+								return nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
 							})
 
-							wg.Go(func() {
+							wg.Go(func() error {
 								homeLogger := createLoggerWithSection("home")
-								setupErr = home.SetupConfigs(config.Home, homeLogger, dryRun)
+								return home.SetupConfigs(config.Home, homeLogger, dryRun)
 							})
 
-							wg.Go(func() {
+							wg.Go(func() error {
 								cronLogger := createLoggerWithSection("cron")
-								setupErr = cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
+								return cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
 							})
 
-							wg.Go(func() {
+							wg.Go(func() error {
 								dockerLogger := createLoggerWithSection("dock")
-								setupErr = dock.SetupDock(config.Dock, dockerLogger, dryRun)
+								return dock.SetupDock(config.Dock, dockerLogger, dryRun)
 							})
 
-							wg.Wait()
-							return setupErr
+							return wg.Wait()
 						}).
 						Run()
 
