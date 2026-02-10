@@ -10,16 +10,21 @@ import (
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/brew"
-	"github.com/quintisimo/macfigure/cron"
-	"github.com/quintisimo/macfigure/dock"
+	brewConfig "github.com/quintisimo/macfigure/gen/brew"
 	"github.com/quintisimo/macfigure/gen/config"
-	"github.com/quintisimo/macfigure/home"
-	"github.com/quintisimo/macfigure/nsglobaldomain"
+	cronConfig "github.com/quintisimo/macfigure/gen/cron"
+	dockConfig "github.com/quintisimo/macfigure/gen/dock"
+	homeConfig "github.com/quintisimo/macfigure/gen/home"
+	nsglobaldomainConfig "github.com/quintisimo/macfigure/gen/nsglobaldomain"
+	"github.com/quintisimo/macfigure/programs"
+	"github.com/quintisimo/macfigure/programs/brew"
+	"github.com/quintisimo/macfigure/programs/cron"
+	"github.com/quintisimo/macfigure/programs/dock"
+	"github.com/quintisimo/macfigure/programs/home"
+	"github.com/quintisimo/macfigure/programs/nsglobaldomain"
 	"github.com/quintisimo/macfigure/secret"
 	"github.com/quintisimo/macfigure/utils"
 	"github.com/urfave/cli/v3"
-	"golang.org/x/sync/errgroup"
 )
 
 func loadConfig(cmd *cli.Command) (config.Config, error) {
@@ -74,7 +79,7 @@ func main() {
 					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					err := spinner.New().
+					return spinner.New().
 						Title("Applying config...").
 						ActionWithErr(func(context.Context) error {
 							dryRun := cmd.Bool("dry-run")
@@ -84,44 +89,40 @@ func main() {
 								return configErr
 							}
 
-							logger := log.New(os.Stderr)
-							logger.SetLevel(logLevels[cmd.String("loglevel")])
-							createLoggerWithSection := func(section string) *log.Logger {
-								return logger.With("section", section)
-							}
-
-							wg := new(errgroup.Group)
-
-							wg.Go(func() error {
-								brewLogger := createLoggerWithSection("brew")
-								return brew.SetupPackages(config.Brew, brewLogger, dryRun)
-							})
-
-							wg.Go(func() error {
-								nsglobaldomainLogger := createLoggerWithSection("nsglobaldomain")
-								return nsglobaldomain.WriteConfig(config.Nsglobaldomain, nsglobaldomainLogger, dryRun)
-							})
-
-							wg.Go(func() error {
-								homeLogger := createLoggerWithSection("home")
-								return home.SetupConfigs(config.Home, homeLogger, dryRun)
-							})
-
-							wg.Go(func() error {
-								cronLogger := createLoggerWithSection("cron")
-								return cron.SetupCronJobs(config.Cron, cronLogger, dryRun)
-							})
-
-							wg.Go(func() error {
-								dockerLogger := createLoggerWithSection("dock")
-								return dock.SetupDock(config.Dock, dockerLogger, dryRun)
-							})
-
-							return wg.Wait()
+							return programs.RunInParallel([]programs.Execution{
+								&brew.BrewProgram{
+									Program: programs.Program[brewConfig.Brew]{
+										Name:  "brew",
+										Input: config.Brew,
+									},
+								},
+								&nsglobaldomain.NSGlobalDomainProgram{
+									Program: programs.Program[nsglobaldomainConfig.Nsglobaldomain]{
+										Name:  "nsglobaldomain",
+										Input: config.Nsglobaldomain,
+									},
+								},
+								&home.HomeProgram{
+									Program: programs.Program[[]homeConfig.Home]{
+										Name:  "home",
+										Input: config.Home,
+									},
+								},
+								&cron.CronProgram{
+									Program: programs.Program[[]cronConfig.Cron]{
+										Name:  "cron",
+										Input: config.Cron,
+									},
+								},
+								&dock.DockProgram{
+									Program: programs.Program[dockConfig.Dock]{
+										Name:  "dock",
+										Input: config.Dock,
+									},
+								},
+							}, logLevels[cmd.String("loglevel")], dryRun)
 						}).
 						Run()
-
-					return err
 				},
 			},
 			{

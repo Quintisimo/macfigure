@@ -8,7 +8,16 @@ AppleEnableMouseSwipeNavigateWithScrolls: Boolean?
 AppleEnableSwipeNavigateWithScrolls: Boolean?
 AppleFontSmoothing: Int(isBetween(0, 2))?
 AppleInterfaceStyle: ("Dark")?
-AppleIconAppearanceTheme: ("RegularDark" | "RegularAutomatic" | "ClearLight" | "ClearDark" | "ClearAutomatic" | "TintedLight" | "TintedDark" | "TintedAutomatic")?
+AppleIconAppearanceTheme: (
+  "RegularDark"
+    | "RegularAutomatic"
+    | "ClearLight"
+    | "ClearDark"
+    | "ClearAutomatic"
+    | "TintedLight"
+    | "TintedDark"
+    | "TintedAutomatic"
+)?
 AppleInterfaceStyleSwitchesAutomatically: Boolean?
 AppleKeyboardUIMode: Int(this == 0 || this == 2 || this == 3)?
 ApplePressAndHoldEnabled: Boolean?
@@ -40,7 +49,7 @@ KeyRepeat: Int?
 PMPrintingExpandedStateForPrint: Boolean?
 PMPrintingExpandedStateForPrint2: Boolean?
 `com.apple.keyboard.fnState`: Boolean?
-`com.apple.mouse.tapBehavior`:Int(this == 1)?
+`com.apple.mouse.tapBehavior`: Int(this == 1)?
 `com.apple.sound.beep.volume`: Float(isBetween(0, 1))?
 `com.apple.sound.beep.feedback`: Int?
 `com.apple.trackpad.enableSecondaryClick`: Boolean?

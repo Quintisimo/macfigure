@@ -7,8 +7,13 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/brew"
+	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
+
+type BrewProgram struct {
+	programs.Program[brew.Brew]
+}
 
 func writeBrewFileLines(file *os.File, packagesType string, packages []string) error {
 	prefix := "brew"
@@ -32,7 +37,7 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 	return nil
 }
 
-func SetupPackages(config brew.Brew, logger *log.Logger, dryRun bool) error {
+func (b *BrewProgram) Run(logger *log.Logger, dryRun bool) error {
 	file, err := os.CreateTemp("", "brewfile-*.Brewfile")
 	if err != nil {
 		return err
@@ -41,12 +46,12 @@ func SetupPackages(config brew.Brew, logger *log.Logger, dryRun bool) error {
 	defer file.Close()
 	defer os.Remove(file.Name())
 
-	formulaErr := writeBrewFileLines(file, "formula", config.Formulas)
+	formulaErr := writeBrewFileLines(file, "formula", b.Input.Formulas)
 	if formulaErr != nil {
 		return formulaErr
 	}
 
-	caskErr := writeBrewFileLines(file, "cask", config.Casks)
+	caskErr := writeBrewFileLines(file, "cask", b.Input.Casks)
 	if caskErr != nil {
 		return caskErr
 	}

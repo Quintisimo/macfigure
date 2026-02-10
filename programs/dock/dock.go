@@ -7,8 +7,13 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/dock"
+	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
+
+type DockProgram struct {
+	programs.Program[dock.Dock]
+}
 
 func appXml(path string) string {
 	return fmt.Sprintf(`
@@ -98,14 +103,14 @@ func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg strin
 	return nil
 }
 
-func SetupDock(config dock.Dock, logger *log.Logger, dryRun bool) error {
+func (d *DockProgram) Run(logger *log.Logger, dryRun bool) error {
 	const addCmd = "defaults write com.apple.dock"
 	const rmCmd = "defaults delete com.apple.dock"
 
 	const appsCmd = "persistent-apps"
 	appsAddCmd := fmt.Sprintf("%s %s", addCmd, appsCmd)
 	appsRmCmd := fmt.Sprintf("%s %s", rmCmd, appsCmd)
-	updateDockAppsErr := updateDockItems(config.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", logger, dryRun)
+	updateDockAppsErr := updateDockItems(d.Input.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", logger, dryRun)
 	if updateDockAppsErr != nil {
 		return updateDockAppsErr
 	}
@@ -113,12 +118,12 @@ func SetupDock(config dock.Dock, logger *log.Logger, dryRun bool) error {
 	const folderCmd = "persistent-others"
 	foldersAddCmd := fmt.Sprintf("%s %s", addCmd, folderCmd)
 	foldersRmCmd := fmt.Sprintf("%s %s", rmCmd, folderCmd)
-	updateDockFoldersErr := updateDockItems(config.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", logger, dryRun)
+	updateDockFoldersErr := updateDockItems(d.Input.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", logger, dryRun)
 	if updateDockFoldersErr != nil {
 		return updateDockFoldersErr
 	}
 
-	writeConfigErr := utils.WriteConfig(reflect.ValueOf(config), "com.apple.dock", addCmd, rmCmd, logger, dryRun)
+	writeConfigErr := utils.WriteConfig(reflect.ValueOf(d.Input), "com.apple.dock", addCmd, rmCmd, logger, dryRun)
 	if writeConfigErr != nil {
 		return writeConfigErr
 	}

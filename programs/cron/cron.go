@@ -6,13 +6,18 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/gen/cron"
+	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
-func SetupCronJobs(crons []cron.Cron, logger *log.Logger, dryRun bool) error {
-	if utils.SliceHasItems(crons) {
+type CronProgram struct {
+	programs.Program[[]cron.Cron]
+}
+
+func (c *CronProgram) Run(logger *log.Logger, dryRun bool) error {
+	if utils.SliceHasItems(c.Input) {
 		cmd := ""
-		for _, cron := range crons {
+		for _, cron := range c.Input {
 			copyFileErr := utils.CopyFile(cron.Source, cron.Target, logger, dryRun)
 			if copyFileErr != nil {
 				return copyFileErr
