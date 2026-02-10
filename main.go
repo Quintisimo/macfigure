@@ -47,10 +47,11 @@ func main() {
 		Usage: "A tool to manage macOS configurations",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "config",
-				Aliases: []string{"c"},
-				Usage:   "Path to the configuration `file`",
-				Value:   utils.GetConfigPath(),
+				Name:      "config",
+				Aliases:   []string{"c"},
+				Usage:     "Path to the configuration `file`",
+				Value:     utils.GetConfigPath(),
+				TakesFile: true,
 			},
 			&cli.BoolFlag{
 				Name:    "dry-run",
