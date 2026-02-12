@@ -1,26 +1,51 @@
 package secret
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 
 	"filippo.io/age"
+	"github.com/charmbracelet/log"
+	"github.com/quintisimo/macfigure/utils"
 )
 
-func openSecretFile(secretFileName string, privateKey string) (string, error) {
-	identity, identityErr := age.ParseX25519Identity(privateKey)
+func DecryptSecretFile(secretFileName string, logger *log.Logger, dryRun bool) (io.Reader, error) {
+	if !dryRun {
+		return decryptFile(secretFileName)
+	} else {
+		utils.DryRunInfo(fmt.Sprintf("Reading %s", secretFileName), logger)
+	}
+	return nil, nil
+}
+
+func decryptFile(secretFileName string) (io.Reader, error) {
+	decryptionKey, decryptionKeyErr := DecryptionKeyItem.Get()
+	if decryptionKeyErr != nil {
+		return nil, decryptionKeyErr
+	}
+
+	identity, identityErr := age.ParseX25519Identity(decryptionKey)
 	if identityErr != nil {
-		return "", identityErr
+		return nil, identityErr
 	}
 
 	file, fileErr := os.Open(secretFileName)
 	if fileErr != nil {
-		return "", fileErr
+		return nil, fileErr
 	}
 	defer file.Close()
 
 	reader, readerErr := age.Decrypt(file, identity)
+	if readerErr != nil {
+		return nil, readerErr
+	}
+	return reader, nil
+}
+
+func openSecretFile(secretFileName string) (string, error) {
+	reader, readerErr := decryptFile(secretFileName)
 	if readerErr != nil {
 		return "", readerErr
 	}
@@ -60,8 +85,13 @@ func editSecretFile(tempFileName string) (string, error) {
 	return string(contents), nil
 }
 
-func saveSecretFile(contents string, secretFileName string, publicKey string) error {
-	recipient, recipientErr := age.ParseX25519Recipient(publicKey)
+func saveSecretFile(contents string, secretFileName string) error {
+	encryptionKey, encryptionKeyErr := EncryptionKeyItem.Get()
+	if encryptionKeyErr != nil {
+		return encryptionKeyErr
+	}
+
+	recipient, recipientErr := age.ParseX25519Recipient(encryptionKey)
 	if recipientErr != nil {
 		return recipientErr
 	}
@@ -89,18 +119,13 @@ func saveSecretFile(contents string, secretFileName string, publicKey string) er
 }
 
 func Edit(secretFileName string) error {
-	publicKey, privateKey, getErr := GetKeys()
-	if getErr != nil {
-		return getErr
-	}
-
 	if _, statErr := os.Stat(secretFileName); os.IsNotExist(statErr) {
-		if saveErr := saveSecretFile("", secretFileName, publicKey); saveErr != nil {
+		if saveErr := saveSecretFile("", secretFileName); saveErr != nil {
 			return saveErr
 		}
 	}
 
-	tempFileName, tempFileErr := openSecretFile(secretFileName, privateKey)
+	tempFileName, tempFileErr := openSecretFile(secretFileName)
 	if tempFileErr != nil {
 		return tempFileErr
 	}
@@ -111,7 +136,7 @@ func Edit(secretFileName string) error {
 		return editErr
 	}
 
-	if saveErr := saveSecretFile(contents, secretFileName, publicKey); saveErr != nil {
+	if saveErr := saveSecretFile(contents, secretFileName); saveErr != nil {
 		return saveErr
 	}
 

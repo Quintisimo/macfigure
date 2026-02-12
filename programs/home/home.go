@@ -14,7 +14,12 @@ type HomeProgram struct {
 func (h *HomeProgram) Run(logger *log.Logger, dryRun bool) error {
 	if utils.SliceHasItems(h.Input) {
 		for _, item := range h.Input {
-			copyFileErr := utils.CopyFile(item.Source, item.Target, logger, dryRun)
+			reader, readerErr := utils.ReadFile(item.Source, logger, dryRun)
+			if readerErr != nil {
+				return readerErr
+			}
+
+			copyFileErr := utils.WriteFile(reader, item.Target, logger, dryRun)
 			if copyFileErr != nil {
 				return copyFileErr
 			}

@@ -7,28 +7,14 @@ import (
 
 const serviceName = "macfigure"
 
-var encryptionKeyItem KeyvaultOperations = &KeyvaultItem{
+var EncryptionKeyItem KeyvaultOperations = &KeyvaultItem{
 	service:  serviceName,
-	username: "encryptionKey",
+	username: "Encryption Key",
 }
 
-var decryptionKeyItem KeyvaultOperations = &KeyvaultItem{
+var DecryptionKeyItem KeyvaultOperations = &KeyvaultItem{
 	service:  serviceName,
-	username: "decryptionKey",
-}
-
-func GetKeys() (encryptionKey string, decryptionKey string, error error) {
-	encryptionKey, encryptionKeyErr := encryptionKeyItem.Get()
-	if encryptionKeyErr != nil {
-		return "", "", encryptionKeyErr
-	}
-
-	decryptionKey, decryptionKeyErr := decryptionKeyItem.Get()
-	if decryptionKeyErr != nil {
-		return "", "", decryptionKeyErr
-	}
-
-	return encryptionKey, decryptionKey, nil
+	username: "Decryption Key",
 }
 
 func confirmDialog(title string, value *bool) error {
@@ -49,13 +35,16 @@ func confirmDialog(title string, value *bool) error {
 func GenerateKeys() error {
 	regenerateKeys := false
 
-	_, _, getKeysErr := GetKeys()
+	_, encryptionKeyErr := EncryptionKeyItem.Get()
+	_, decryptionKeyErr := DecryptionKeyItem.Get()
 
-	if getKeysErr != nil {
+	getKeysErr := encryptionKeyErr != nil || decryptionKeyErr != nil
+
+	if getKeysErr {
 		regenerateKeys = true
 	}
 
-	if getKeysErr == nil {
+	if !getKeysErr {
 		confirmErr := confirmDialog("Secret keys already exist in the keychain, do you want to regenerate them?", &regenerateKeys)
 
 		if confirmErr != nil {
@@ -77,12 +66,12 @@ func GenerateKeys() error {
 			return generationErr
 		}
 
-		decryptionKeySaveErr := decryptionKeyItem.Set(identity.String())
+		decryptionKeySaveErr := DecryptionKeyItem.Set(identity.String())
 		if decryptionKeySaveErr != nil {
 			return decryptionKeySaveErr
 		}
 
-		encryptionKeySaveErr := encryptionKeyItem.Set(identity.Recipient().String())
+		encryptionKeySaveErr := EncryptionKeyItem.Set(identity.Recipient().String())
 		if encryptionKeySaveErr != nil {
 			return encryptionKeySaveErr
 		}

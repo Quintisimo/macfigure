@@ -2,6 +2,7 @@ package secret
 
 import (
 	"encoding/base64"
+	"fmt"
 	"os/exec"
 )
 
@@ -17,6 +18,7 @@ type KeyvaultItem struct {
 type KeyvaultOperations interface {
 	Get() (string, error)
 	Set(password string) error
+	Print() error
 }
 
 func (k KeyvaultItem) Get() (string, error) {
@@ -50,5 +52,15 @@ func (k KeyvaultItem) Set(password string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (k KeyvaultItem) Print() error {
+	password, err := k.Get()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s: %s\n", k.username, password)
 	return nil
 }

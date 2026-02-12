@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"reflect"
@@ -30,21 +31,28 @@ func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error 
 	return nil
 }
 
-func CopyFile(source string, target string, logger *log.Logger, dryRun bool) error {
+func ReadFile(source string, logger *log.Logger, dryRun bool) (io.Reader, error) {
 	if !dryRun {
-		contents, readErr := os.ReadFile(source)
-		if readErr != nil {
-			return readErr
+		file, err := os.Open(source)
+		if err != nil {
+			return nil, err
 		}
+		return file, nil
+	} else {
+		DryRunInfo(fmt.Sprintf("Reading %s", source), logger)
+	}
+	return nil, nil
+}
 
+func WriteFile(reader io.Reader, target string, logger *log.Logger, dryRun bool) error {
+	if !dryRun {
 		file, createErr := os.Create(target)
 		if createErr != nil {
 			return createErr
 		}
 		defer file.Close()
 
-		_, writeErr := file.Write(contents)
-		if writeErr != nil {
+		if _, writeErr := io.Copy(file, reader); writeErr != nil {
 			return writeErr
 		}
 	} else {

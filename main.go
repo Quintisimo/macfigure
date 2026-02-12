@@ -16,13 +16,14 @@ import (
 	dockConfig "github.com/quintisimo/macfigure/gen/dock"
 	homeConfig "github.com/quintisimo/macfigure/gen/home"
 	nsglobaldomainConfig "github.com/quintisimo/macfigure/gen/nsglobaldomain"
+	secretConfig "github.com/quintisimo/macfigure/gen/secret"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/programs/brew"
 	"github.com/quintisimo/macfigure/programs/cron"
 	"github.com/quintisimo/macfigure/programs/dock"
 	"github.com/quintisimo/macfigure/programs/home"
 	"github.com/quintisimo/macfigure/programs/nsglobaldomain"
-	"github.com/quintisimo/macfigure/secret"
+	"github.com/quintisimo/macfigure/programs/secret"
 	"github.com/urfave/cli/v3"
 )
 
@@ -111,6 +112,12 @@ func main() {
 										Input: parsedConfig.Cron,
 									},
 								},
+								&secret.SecretProgram{
+									Program: programs.Program[[]secretConfig.Secret]{
+										Name:  "secret",
+										Input: parsedConfig.Secret,
+									},
+								},
 								&dock.DockProgram{
 									Program: programs.Program[dockConfig.Dock]{
 										Name:  "dock",
@@ -127,8 +134,8 @@ func main() {
 				Usage: "Manage secrets with age",
 				Commands: []*cli.Command{
 					{
-						Name:  "key",
-						Usage: "Manage age keys in the macOS keychain",
+						Name:  "keychain",
+						Usage: "Manage secrets encryption and decryption key in the macOS keychain",
 						Commands: []*cli.Command{
 							{
 								Name:  "generate",
@@ -141,13 +148,16 @@ func main() {
 								Name:  "get",
 								Usage: "Get the stored age public key from the macOS keychain",
 								Action: func(ctx context.Context, cmd *cli.Command) error {
-									publicKey, privateKey, err := secret.GetKeys()
-									if err != nil {
-										return err
+									encryptionKeyPrintErr := secret.EncryptionKeyItem.Print()
+									if encryptionKeyPrintErr != nil {
+										return encryptionKeyPrintErr
 									}
 
-									fmt.Printf("Public key: %s\n", publicKey)
-									fmt.Printf("Private key: %s\n", privateKey)
+									decryptionKeyPrintErr := secret.DecryptionKeyItem.Print()
+									if decryptionKeyPrintErr != nil {
+										return decryptionKeyPrintErr
+									}
+
 									return nil
 								},
 							},

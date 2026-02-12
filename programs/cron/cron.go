@@ -18,7 +18,12 @@ func (c *CronProgram) Run(logger *log.Logger, dryRun bool) error {
 	if utils.SliceHasItems(c.Input) {
 		cmd := ""
 		for _, cron := range c.Input {
-			copyFileErr := utils.CopyFile(cron.Source, cron.Target, logger, dryRun)
+			reader, readerErr := utils.ReadFile(cron.Source, logger, dryRun)
+			if readerErr != nil {
+				return readerErr
+			}
+
+			copyFileErr := utils.WriteFile(reader, cron.Target, logger, dryRun)
 			if copyFileErr != nil {
 				return copyFileErr
 			}
