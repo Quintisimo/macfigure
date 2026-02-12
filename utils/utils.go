@@ -17,14 +17,6 @@ func SliceHasItems[I any](slice []I) bool {
 	return len(slice) > 0
 }
 
-func GetConfigPath() string {
-	homeDir := os.Getenv("XDG_CONFIG_HOME")
-	if homeDir == "" {
-		homeDir = fmt.Sprintf("%s/.config", os.Getenv("HOME"))
-	}
-	return fmt.Sprintf("%s/macfigure/config.pkl", homeDir)
-}
-
 func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error {
 	if !dryRun {
 		log.Info(info)

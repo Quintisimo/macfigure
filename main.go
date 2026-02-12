@@ -23,14 +23,8 @@ import (
 	"github.com/quintisimo/macfigure/programs/home"
 	"github.com/quintisimo/macfigure/programs/nsglobaldomain"
 	"github.com/quintisimo/macfigure/secret"
-	"github.com/quintisimo/macfigure/utils"
 	"github.com/urfave/cli/v3"
 )
-
-func loadConfig(cmd *cli.Command) (config.Config, error) {
-	configFile := cmd.String("config")
-	return config.LoadFromPath(context.Background(), configFile)
-}
 
 func main() {
 	defaultLogLevel := "info"
@@ -42,6 +36,8 @@ func main() {
 	}
 	logLevelKeys := slices.Collect(maps.Keys(logLevels))
 
+	var parsedConfig config.Config
+
 	cmd := &cli.Command{
 		Name:  "macfigure",
 		Usage: "A tool to manage macOS configurations",
@@ -50,8 +46,13 @@ func main() {
 				Name:      "config",
 				Aliases:   []string{"c"},
 				Usage:     "Path to the configuration `file`",
-				Value:     utils.GetConfigPath(),
 				TakesFile: true,
+				Required:  true,
+				Action: func(ctx context.Context, cmd *cli.Command, path string) error {
+					var err error
+					parsedConfig, err = config.LoadFromPath(context.Background(), path)
+					return err
+				},
 			},
 			&cli.BoolFlag{
 				Name:    "dry-run",
@@ -85,40 +86,35 @@ func main() {
 						ActionWithErr(func(context.Context) error {
 							dryRun := cmd.Bool("dry-run")
 
-							config, configErr := loadConfig(cmd)
-							if configErr != nil {
-								return configErr
-							}
-
 							return programs.RunInParallel([]programs.Execution{
 								&brew.BrewProgram{
 									Program: programs.Program[brewConfig.Brew]{
 										Name:  "brew",
-										Input: config.Brew,
+										Input: parsedConfig.Brew,
 									},
 								},
 								&nsglobaldomain.NSGlobalDomainProgram{
 									Program: programs.Program[nsglobaldomainConfig.Nsglobaldomain]{
 										Name:  "nsglobaldomain",
-										Input: config.Nsglobaldomain,
+										Input: parsedConfig.Nsglobaldomain,
 									},
 								},
 								&home.HomeProgram{
 									Program: programs.Program[[]homeConfig.Home]{
 										Name:  "home",
-										Input: config.Home,
+										Input: parsedConfig.Home,
 									},
 								},
 								&cron.CronProgram{
 									Program: programs.Program[[]cronConfig.Cron]{
 										Name:  "cron",
-										Input: config.Cron,
+										Input: parsedConfig.Cron,
 									},
 								},
 								&dock.DockProgram{
 									Program: programs.Program[dockConfig.Dock]{
 										Name:  "dock",
-										Input: config.Dock,
+										Input: parsedConfig.Dock,
 									},
 								},
 							}, logLevels[cmd.String("loglevel")], dryRun)
@@ -161,12 +157,7 @@ func main() {
 						Name:  "edit",
 						Usage: "Edit a secrets file",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							config, configErr := loadConfig(cmd)
-							if configErr != nil {
-								return configErr
-							}
-
-							secretPath, secretErr := secret.List(config.Secret)
+							secretPath, secretErr := secret.List(parsedConfig.Secret)
 							if secretErr != nil {
 								return secretErr
 							}
