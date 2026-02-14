@@ -24,13 +24,11 @@ func List(secret []secret.Secret) (string, error) {
 		items[i] = secretItem.Source
 	}
 
-	runErr := huh.NewSelect[string]().
+	if runErr := huh.NewSelect[string]().
 		Title("Select secret to edit").
 		Options(huh.NewOptions(items...)...).
 		Value(&secretPath).
-		Run()
-
-	if runErr != nil {
+		Run(); runErr != nil {
 		return "", runErr
 	}
 

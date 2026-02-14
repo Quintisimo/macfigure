@@ -14,8 +14,7 @@ type NSGlobalDomainProgram struct {
 }
 
 func (n *NSGlobalDomainProgram) Run(logger *log.Logger, dryRun bool) error {
-	writeConfigErr := utils.WriteConfig(reflect.ValueOf(n.Input), "NSGlobalDomain", "defaults write NSGlobalDomain", "defaults delete -g", logger, dryRun)
-	if writeConfigErr != nil {
+	if writeConfigErr := utils.WriteConfig(reflect.ValueOf(n.Input), "NSGlobalDomain", "defaults write NSGlobalDomain", "defaults delete -g", logger, dryRun); writeConfigErr != nil {
 		return writeConfigErr
 	}
 	return nil

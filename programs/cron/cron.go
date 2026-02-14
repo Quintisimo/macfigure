@@ -23,17 +23,15 @@ func (c *CronProgram) Run(logger *log.Logger, dryRun bool) error {
 				return readerErr
 			}
 
-			copyFileErr := utils.WriteFile(reader, cron.Target, logger, dryRun)
-			if copyFileErr != nil {
+			if copyFileErr := utils.WriteFile(reader, cron.Target, logger, dryRun); copyFileErr != nil {
 				return copyFileErr
 			}
 
 			cmd = fmt.Sprintf("%s\n%s %s", cmd, cron.Schedule, cron.Target)
 		}
-		cmd = fmt.Sprintf("echo \"%s\" | crontab -", strings.TrimSpace(cmd))
 
-		cronJobErr := utils.RunCommand(cmd, "Setting up cron jobs", logger, dryRun)
-		if cronJobErr != nil {
+		cmd = fmt.Sprintf("echo \"%s\" | crontab -", strings.TrimSpace(cmd))
+		if cronJobErr := utils.RunCommand(cmd, "Setting up cron jobs", logger, dryRun); cronJobErr != nil {
 			return cronJobErr
 		}
 	}

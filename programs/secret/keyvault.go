@@ -22,45 +22,43 @@ type KeyvaultOperations interface {
 }
 
 func (k KeyvaultItem) Get() (string, error) {
-	out, err := exec.Command(
+	encodedPassword, getPasswordErr := exec.Command(
 		execPathKeychain,
 		"find-generic-password",
 		"-s", k.service,
 		"-wa", k.username).CombinedOutput()
 
-	if err != nil {
-		return "", err
+	if getPasswordErr != nil {
+		return "", getPasswordErr
 	}
 
-	secret, err := base64.StdEncoding.DecodeString(string(out))
-	return string(secret), err
+	secret, getPasswordErr := base64.StdEncoding.DecodeString(string(encodedPassword))
+	return string(secret), getPasswordErr
 }
 
 func (k KeyvaultItem) Set(password string) error {
 	encodedPassword := base64.StdEncoding.EncodeToString([]byte(password))
-	cmd := exec.Command(
+
+	if addPasswordErr := exec.Command(
 		execPathKeychain,
 		"add-generic-password",
 		"-U",
 		"-s", k.service,
 		"-a", k.username,
 		"-w", encodedPassword,
-	)
-	err := cmd.Run()
-
-	if err != nil {
-		return err
+	).Run(); addPasswordErr != nil {
+		return addPasswordErr
 	}
 
 	return nil
 }
 
 func (k KeyvaultItem) Print() error {
-	password, err := k.Get()
-	if err != nil {
-		return err
+	password, getPasswordErr := k.Get()
+	if getPasswordErr != nil {
+		return getPasswordErr
 	}
 
-	fmt.Printf("%s: %s\n", k.username, password)
-	return nil
+	_, printErr := fmt.Printf("%s: %s\n", k.username, password)
+	return printErr
 }

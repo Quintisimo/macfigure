@@ -21,9 +21,9 @@ func SliceHasItems[I any](slice []I) bool {
 func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error {
 	if !dryRun {
 		log.Info(info)
-		command := exec.Command(cmd)
-		if err := command.Run(); err != nil {
-			return err
+
+		if commandErr := exec.Command(cmd).Run(); commandErr != nil {
+			return commandErr
 		}
 	} else {
 		DryRunInfo(fmt.Sprintf("Running %s", cmd), logger)
@@ -33,9 +33,9 @@ func RunCommand(cmd string, info string, logger *log.Logger, dryRun bool) error 
 
 func ReadFile(source string, logger *log.Logger, dryRun bool) (io.Reader, error) {
 	if !dryRun {
-		file, err := os.Open(source)
-		if err != nil {
-			return nil, err
+		file, openErr := os.Open(source)
+		if openErr != nil {
+			return nil, openErr
 		}
 		return file, nil
 	} else {
@@ -85,15 +85,16 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 			value := ""
 
 			if !field.IsNil() {
-				strValue, err := getPropertyTypeAndValue(field.Elem(), fieldName)
-				if err != nil {
-					return err
+				strValue, typeAndValueErr := getPropertyTypeAndValue(field.Elem(), fieldName)
+				if typeAndValueErr != nil {
+					return typeAndValueErr
 				}
 				value = strValue
 			}
 
 			var cmd string
 			var msg string
+
 			if value != "" {
 				cmd = fmt.Sprintf("%s %s %s", addCmd, fieldName, value)
 				msg = "Adding"
@@ -102,8 +103,7 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 				msg = "Deleting"
 			}
 
-			cmdErr := RunCommand(cmd, fmt.Sprintf("%s %s %s", msg, domain, fieldName), logger, dryRun)
-			if cmdErr != nil {
+			if cmdErr := RunCommand(cmd, fmt.Sprintf("%s %s %s", msg, domain, fieldName), logger, dryRun); cmdErr != nil {
 				return cmdErr
 			}
 		}

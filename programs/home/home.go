@@ -19,8 +19,7 @@ func (h *HomeProgram) Run(logger *log.Logger, dryRun bool) error {
 				return readerErr
 			}
 
-			copyFileErr := utils.WriteFile(reader, item.Target, logger, dryRun)
-			if copyFileErr != nil {
+			if copyFileErr := utils.WriteFile(reader, item.Target, logger, dryRun); copyFileErr != nil {
 				return copyFileErr
 			}
 		}

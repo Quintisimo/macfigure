@@ -72,8 +72,7 @@ func getInfoMsg(path string) string {
 }
 
 func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg string, logger *log.Logger, dryRun bool) error {
-	delErr := utils.RunCommand(rmCmd, clrMsg, logger, dryRun)
-	if delErr != nil {
+	if delErr := utils.RunCommand(rmCmd, clrMsg, logger, dryRun); delErr != nil {
 		return delErr
 	}
 
@@ -94,8 +93,7 @@ func updateDockItems[I any](items []I, addCmd string, rmCmd string, clrMsg strin
 				cmd = fmt.Sprintf(`%s "%s"`, cmdPrefix, xml)
 			}
 
-			cmdErr := utils.RunCommand(cmd, getInfoMsg(path), logger, dryRun)
-			if cmdErr != nil {
+			if cmdErr := utils.RunCommand(cmd, getInfoMsg(path), logger, dryRun); cmdErr != nil {
 				return cmdErr
 			}
 		}
@@ -110,26 +108,24 @@ func (d *DockProgram) Run(logger *log.Logger, dryRun bool) error {
 	const appsCmd = "persistent-apps"
 	appsAddCmd := fmt.Sprintf("%s %s", addCmd, appsCmd)
 	appsRmCmd := fmt.Sprintf("%s %s", rmCmd, appsCmd)
-	updateDockAppsErr := updateDockItems(d.Input.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", logger, dryRun)
-	if updateDockAppsErr != nil {
+
+	if updateDockAppsErr := updateDockItems(d.Input.Apps, appsAddCmd, appsRmCmd, "Clear persistent apps", logger, dryRun); updateDockAppsErr != nil {
 		return updateDockAppsErr
 	}
 
 	const folderCmd = "persistent-others"
 	foldersAddCmd := fmt.Sprintf("%s %s", addCmd, folderCmd)
 	foldersRmCmd := fmt.Sprintf("%s %s", rmCmd, folderCmd)
-	updateDockFoldersErr := updateDockItems(d.Input.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", logger, dryRun)
-	if updateDockFoldersErr != nil {
+
+	if updateDockFoldersErr := updateDockItems(d.Input.Folders, foldersAddCmd, foldersRmCmd, "Clear persistent others", logger, dryRun); updateDockFoldersErr != nil {
 		return updateDockFoldersErr
 	}
 
-	writeConfigErr := utils.WriteConfig(reflect.ValueOf(d.Input), "com.apple.dock", addCmd, rmCmd, logger, dryRun)
-	if writeConfigErr != nil {
+	if writeConfigErr := utils.WriteConfig(reflect.ValueOf(d.Input), "com.apple.dock", addCmd, rmCmd, logger, dryRun); writeConfigErr != nil {
 		return writeConfigErr
 	}
 
-	restartDockErr := utils.RunCommand("killall Dock", "Restart Dock to apply changes", logger, dryRun)
-	if restartDockErr != nil {
+	if restartDockErr := utils.RunCommand("killall Dock", "Restart Dock to apply changes", logger, dryRun); restartDockErr != nil {
 		return restartDockErr
 	}
 	return nil

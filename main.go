@@ -39,7 +39,7 @@ func main() {
 
 	var parsedConfig config.Config
 
-	cmd := &cli.Command{
+	cli := &cli.Command{
 		Name:  "macfigure",
 		Usage: "A tool to manage macOS configurations",
 		Flags: []cli.Flag{
@@ -50,9 +50,9 @@ func main() {
 				TakesFile: true,
 				Required:  true,
 				Action: func(ctx context.Context, cmd *cli.Command, path string) error {
-					var err error
-					parsedConfig, err = config.LoadFromPath(context.Background(), path)
-					return err
+					var parsingErr error
+					parsedConfig, parsingErr = config.LoadFromPath(context.Background(), path)
+					return parsingErr
 				},
 			},
 			&cli.BoolFlag{
@@ -148,13 +148,11 @@ func main() {
 								Name:  "get",
 								Usage: "Get the stored age public key from the macOS keychain",
 								Action: func(ctx context.Context, cmd *cli.Command) error {
-									encryptionKeyPrintErr := secret.EncryptionKeyItem.Print()
-									if encryptionKeyPrintErr != nil {
+									if encryptionKeyPrintErr := secret.EncryptionKeyItem.Print(); encryptionKeyPrintErr != nil {
 										return encryptionKeyPrintErr
 									}
 
-									decryptionKeyPrintErr := secret.DecryptionKeyItem.Print()
-									if decryptionKeyPrintErr != nil {
+									if decryptionKeyPrintErr := secret.DecryptionKeyItem.Print(); decryptionKeyPrintErr != nil {
 										return decryptionKeyPrintErr
 									}
 
@@ -184,7 +182,7 @@ func main() {
 		},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+	if cliErr := cli.Run(context.Background(), os.Args); cliErr != nil {
+		log.Fatal(cliErr)
 	}
 }

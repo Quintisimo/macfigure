@@ -18,14 +18,12 @@ var DecryptionKeyItem KeyvaultOperations = &KeyvaultItem{
 }
 
 func confirmDialog(title string, value *bool) error {
-	confirmErr := huh.NewConfirm().
+	if confirmErr := huh.NewConfirm().
 		Title(title).
 		Affirmative("Yes!").
 		Negative("No.").
 		Value(value).
-		Run()
-
-	if confirmErr != nil {
+		Run(); confirmErr != nil {
 		return confirmErr
 	}
 
@@ -45,16 +43,12 @@ func GenerateKeys() error {
 	}
 
 	if !getKeysErr {
-		confirmErr := confirmDialog("Secret keys already exist in the keychain, do you want to regenerate them?", &regenerateKeys)
-
-		if confirmErr != nil {
+		if confirmErr := confirmDialog("Secret keys already exist in the keychain, do you want to regenerate them?", &regenerateKeys); confirmErr != nil {
 			return confirmErr
 		}
 
 		if regenerateKeys {
-			confirmAgainErr := confirmDialog("Are you sure? If you currently have secrets encrypted with the old keys you will not be able to decrypt them", &regenerateKeys)
-
-			if confirmAgainErr != nil {
+			if confirmAgainErr := confirmDialog("Are you sure? If you currently have secrets encrypted with the old keys you will not be able to decrypt them", &regenerateKeys); confirmAgainErr != nil {
 				return confirmAgainErr
 			}
 		}
@@ -66,13 +60,11 @@ func GenerateKeys() error {
 			return generationErr
 		}
 
-		decryptionKeySaveErr := DecryptionKeyItem.Set(identity.String())
-		if decryptionKeySaveErr != nil {
+		if decryptionKeySaveErr := DecryptionKeyItem.Set(identity.String()); decryptionKeySaveErr != nil {
 			return decryptionKeySaveErr
 		}
 
-		encryptionKeySaveErr := EncryptionKeyItem.Set(identity.Recipient().String())
-		if encryptionKeySaveErr != nil {
+		if encryptionKeySaveErr := EncryptionKeyItem.Set(identity.Recipient().String()); encryptionKeySaveErr != nil {
 			return encryptionKeySaveErr
 		}
 	}

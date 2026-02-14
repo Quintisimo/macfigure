@@ -29,8 +29,8 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 	if utils.SliceHasItems(packages) {
 		for _, item := range packages {
 			line := fmt.Sprintln(prefix, `"`, item, `"`)
-			if _, err := file.Write([]byte(line)); err != nil {
-				return err
+			if _, writeErr := file.Write([]byte(line)); writeErr != nil {
+				return writeErr
 			}
 		}
 	}
@@ -38,28 +38,24 @@ func writeBrewFileLines(file *os.File, packagesType string, packages []string) e
 }
 
 func (b *BrewProgram) Run(logger *log.Logger, dryRun bool) error {
-	file, err := os.CreateTemp("", "brewfile-*.Brewfile")
-	if err != nil {
-		return err
+	file, fileErr := os.CreateTemp("", "brewfile-*.Brewfile")
+	if fileErr != nil {
+		return fileErr
 	}
 
 	defer file.Close()
 	defer os.Remove(file.Name())
 
-	formulaErr := writeBrewFileLines(file, "formula", b.Input.Formulas)
-	if formulaErr != nil {
+	if formulaErr := writeBrewFileLines(file, "formula", b.Input.Formulas); formulaErr != nil {
 		return formulaErr
 	}
 
-	caskErr := writeBrewFileLines(file, "cask", b.Input.Casks)
-	if caskErr != nil {
+	if caskErr := writeBrewFileLines(file, "cask", b.Input.Casks); caskErr != nil {
 		return caskErr
 	}
 
 	cmd := fmt.Sprintf("brew bundle --cleanup zap --file=%s", file.Name())
-
-	cmdErr := utils.RunCommand(cmd, "Running homebrew cli", logger, dryRun)
-	if cmdErr != nil {
+	if cmdErr := utils.RunCommand(cmd, "Running homebrew cli", logger, dryRun); cmdErr != nil {
 		return cmdErr
 	}
 	return nil
