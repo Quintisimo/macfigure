@@ -28,4 +28,4 @@ go.work.sum
 .env
 
 # Generated files
-gen
+*.pkl.go

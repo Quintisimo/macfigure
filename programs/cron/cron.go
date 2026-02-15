@@ -5,13 +5,12 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/cron"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type CronProgram struct {
-	programs.Program[[]cron.Cron]
+	programs.Program[[]Cron]
 }
 
 func (c *CronProgram) Run(logger *log.Logger, dryRun bool) error {

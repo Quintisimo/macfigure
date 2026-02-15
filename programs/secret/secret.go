@@ -2,13 +2,12 @@ package secret
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/secret"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type SecretProgram struct {
-	programs.Program[[]secret.Secret]
+	programs.Program[[]Secret]
 }
 
 func (h *SecretProgram) Run(logger *log.Logger, dryRun bool) error {

@@ -2,13 +2,12 @@ package home
 
 import (
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/home"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type HomeProgram struct {
-	programs.Program[[]home.Home]
+	programs.Program[[]Home]
 }
 
 func (h *HomeProgram) Run(logger *log.Logger, dryRun bool) error {

@@ -10,15 +10,9 @@ import (
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
-	brewConfig "github.com/quintisimo/macfigure/gen/brew"
-	"github.com/quintisimo/macfigure/gen/config"
-	cronConfig "github.com/quintisimo/macfigure/gen/cron"
-	dockConfig "github.com/quintisimo/macfigure/gen/dock"
-	homeConfig "github.com/quintisimo/macfigure/gen/home"
-	nsglobaldomainConfig "github.com/quintisimo/macfigure/gen/nsglobaldomain"
-	secretConfig "github.com/quintisimo/macfigure/gen/secret"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/programs/brew"
+	"github.com/quintisimo/macfigure/programs/config"
 	"github.com/quintisimo/macfigure/programs/cron"
 	"github.com/quintisimo/macfigure/programs/dock"
 	"github.com/quintisimo/macfigure/programs/home"
@@ -89,37 +83,37 @@ func main() {
 
 							return programs.RunInParallel([]programs.Execution{
 								&brew.BrewProgram{
-									Program: programs.Program[brewConfig.Brew]{
+									Program: programs.Program[brew.Brew]{
 										Name:  "brew",
 										Input: parsedConfig.Brew,
 									},
 								},
 								&nsglobaldomain.NSGlobalDomainProgram{
-									Program: programs.Program[nsglobaldomainConfig.Nsglobaldomain]{
+									Program: programs.Program[nsglobaldomain.Nsglobaldomain]{
 										Name:  "nsglobaldomain",
 										Input: parsedConfig.Nsglobaldomain,
 									},
 								},
 								&home.HomeProgram{
-									Program: programs.Program[[]homeConfig.Home]{
+									Program: programs.Program[[]home.Home]{
 										Name:  "home",
 										Input: parsedConfig.Home,
 									},
 								},
 								&cron.CronProgram{
-									Program: programs.Program[[]cronConfig.Cron]{
+									Program: programs.Program[[]cron.Cron]{
 										Name:  "cron",
 										Input: parsedConfig.Cron,
 									},
 								},
 								&secret.SecretProgram{
-									Program: programs.Program[[]secretConfig.Secret]{
+									Program: programs.Program[[]secret.Secret]{
 										Name:  "secret",
 										Input: parsedConfig.Secret,
 									},
 								},
 								&dock.DockProgram{
-									Program: programs.Program[dockConfig.Dock]{
+									Program: programs.Program[dock.Dock]{
 										Name:  "dock",
 										Input: parsedConfig.Dock,
 									},

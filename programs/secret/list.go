@@ -2,10 +2,9 @@ package secret
 
 import (
 	"github.com/charmbracelet/huh"
-	"github.com/quintisimo/macfigure/gen/secret"
 )
 
-func List(secret []secret.Secret) (string, error) {
+func List(secret []Secret) (string, error) {
 	const defaultWidth = 20
 
 	secretPath := ""

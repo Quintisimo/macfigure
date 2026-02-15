@@ -4,13 +4,12 @@ import (
 	"reflect"
 
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/nsglobaldomain"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type NSGlobalDomainProgram struct {
-	programs.Program[nsglobaldomain.Nsglobaldomain]
+	programs.Program[Nsglobaldomain]
 }
 
 func (n *NSGlobalDomainProgram) Run(logger *log.Logger, dryRun bool) error {

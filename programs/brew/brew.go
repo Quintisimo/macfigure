@@ -6,13 +6,12 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/brew"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type BrewProgram struct {
-	programs.Program[brew.Brew]
+	programs.Program[Brew]
 }
 
 func writeBrewFileLines(file *os.File, packagesType string, packages []string) error {

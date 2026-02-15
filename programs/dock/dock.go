@@ -6,13 +6,12 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/gen/dock"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
 )
 
 type DockProgram struct {
-	programs.Program[dock.Dock]
+	programs.Program[Dock]
 }
 
 func appXml(path string) string {

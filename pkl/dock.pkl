@@ -1,4 +1,4 @@
-@go.Package { name = "github.com/quintisimo/macfigure/gen/dock" }
+@go.Package { name = "github.com/quintisimo/macfigure/programs/dock" }
 module macfigure.dock
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"
