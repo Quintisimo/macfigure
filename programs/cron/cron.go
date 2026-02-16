@@ -15,6 +15,10 @@ type CronProgram struct {
 
 func (c *CronProgram) Run(logger *log.Logger, dryRun bool) error {
 	if utils.SliceHasItems(c.Input) {
+		if removeCronErr := utils.RunCommand("crontab -r", "Removing existing cron jobs", logger, dryRun); removeCronErr != nil {
+			return removeCronErr
+		}
+
 		cmd := ""
 		for _, cron := range c.Input {
 			reader, readerErr := utils.ReadFile(cron.Source, logger, dryRun)
