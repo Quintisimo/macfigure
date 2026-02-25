@@ -1,6 +1,8 @@
 package secret
 
 import (
+	"sync"
+
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
@@ -8,6 +10,7 @@ import (
 
 type SecretProgram struct {
 	programs.Program[[]Secret]
+	ExistingSecret *sync.Map
 }
 
 func (h *SecretProgram) Run(logger *log.Logger, dryRun bool) error {
@@ -22,6 +25,7 @@ func (h *SecretProgram) Run(logger *log.Logger, dryRun bool) error {
 			if writeFileErr != nil {
 				return writeFileErr
 			}
+			h.ExistingSecret.Delete(item.Source)
 		}
 	}
 	return nil

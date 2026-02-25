@@ -1,6 +1,8 @@
 package home
 
 import (
+	"sync"
+
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/utils"
@@ -8,6 +10,7 @@ import (
 
 type HomeProgram struct {
 	programs.Program[[]Home]
+	ExisitingHome *sync.Map
 }
 
 func (h *HomeProgram) Run(logger *log.Logger, dryRun bool) error {
@@ -21,6 +24,7 @@ func (h *HomeProgram) Run(logger *log.Logger, dryRun bool) error {
 			if copyFileErr := utils.WriteFile(reader, item.Target, logger, dryRun); copyFileErr != nil {
 				return copyFileErr
 			}
+			h.ExisitingHome.Delete(item.Source)
 		}
 	}
 	return nil

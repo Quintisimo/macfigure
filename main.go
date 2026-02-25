@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
+	"github.com/quintisimo/macfigure/lock"
 	"github.com/quintisimo/macfigure/programs"
 	"github.com/quintisimo/macfigure/programs/brew"
 	"github.com/quintisimo/macfigure/programs/config"
@@ -81,7 +82,12 @@ func main() {
 						ActionWithErr(func(context.Context) error {
 							dryRun := cmd.Bool("dry-run")
 
-							return programs.RunInParallel([]programs.Execution{
+							lockConfig, lockConfigErr := lock.Get()
+							if lockConfigErr != nil {
+								return lockConfigErr
+							}
+
+							programsErr := programs.RunInParallel([]programs.Execution{
 								&brew.BrewProgram{
 									Program: programs.Program[brew.Brew]{
 										Name:  "brew",
@@ -99,6 +105,7 @@ func main() {
 										Name:  "home",
 										Input: parsedConfig.Home,
 									},
+									ExisitingHome: lockConfig,
 								},
 								&cron.CronProgram{
 									Program: programs.Program[[]cron.Cron]{
@@ -111,6 +118,7 @@ func main() {
 										Name:  "secret",
 										Input: parsedConfig.Secret,
 									},
+									ExistingSecret: lockConfig,
 								},
 								&dock.DockProgram{
 									Program: programs.Program[dock.Dock]{
@@ -119,6 +127,13 @@ func main() {
 									},
 								},
 							}, logLevels[cmd.String("loglevel")], dryRun)
+
+							if programsErr != nil {
+								return programsErr
+							}
+
+							lock.DeleteRemoved(lockConfig)
+							return lock.Create(parsedConfig.Home, parsedConfig.Secret)
 						}).
 						Run()
 				},
