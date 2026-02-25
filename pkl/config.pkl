@@ -1,4 +1,4 @@
-@go.Package { name = "github.com/quintisimo/macfigure/programs/config" }
+@go.Package { name = "github.com/quintisimo/macfigure/internal/programs/config" }
 module macfigure.config
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"

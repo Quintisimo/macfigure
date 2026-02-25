@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/quintisimo/macfigure/programs/home"
-	"github.com/quintisimo/macfigure/programs/secret"
+	"github.com/quintisimo/macfigure/internal/programs/home"
+	"github.com/quintisimo/macfigure/internal/programs/secret"
 )
 
 func getPath() (string, error) {
