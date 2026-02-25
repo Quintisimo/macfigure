@@ -3,16 +3,17 @@ module github.com/quintisimo/macfigure
 go 1.25.1
 
 require (
-	filippo.io/age v1.2.1
+	filippo.io/age v1.3.1
 	github.com/apple/pkl-go v0.12.1
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20251124111010-6575a6e28cb3
 	github.com/charmbracelet/log v0.4.2
 	github.com/urfave/cli/v3 v3.6.2
-	golang.org/x/sync v0.15.0
+	golang.org/x/sync v0.18.0
 )
 
 require (
+	filippo.io/hpke v0.4.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
@@ -39,8 +40,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 )
