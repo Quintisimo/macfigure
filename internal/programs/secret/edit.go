@@ -8,7 +8,7 @@ import (
 
 	"filippo.io/age"
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/utils"
+	"github.com/quintisimo/macfigure/internal/utils"
 )
 
 func DecryptSecretFile(secretFileName string, logger *log.Logger, dryRun bool) (io.Reader, error) {

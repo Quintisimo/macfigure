@@ -1,4 +1,4 @@
-@go.Package { name = "github.com/quintisimo/macfigure/programs/brew" }
+@go.Package { name = "github.com/quintisimo/macfigure/internal/programs/brew" }
 module macfigure.brew
 
 import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.11.1#/go.pkl"

@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/log"
-	"github.com/quintisimo/macfigure/programs"
-	"github.com/quintisimo/macfigure/utils"
+	"github.com/quintisimo/macfigure/internal/programs"
+	"github.com/quintisimo/macfigure/internal/utils"
 )
 
 type SecretProgram struct {
