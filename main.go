@@ -80,8 +80,9 @@ func main() {
 						Title("Applying config...").
 						ActionWithErr(func(context.Context) error {
 							dryRun := cmd.Bool("dry-run")
+							logLevel := logLevels[cmd.String("loglevel")]
 
-							lockConfig, lockConfigErr := lock.Get()
+							lockConfig, lockConfigErr := lock.Get(logLevel, dryRun)
 							if lockConfigErr != nil {
 								return lockConfigErr
 							}
@@ -125,14 +126,14 @@ func main() {
 										Input: parsedConfig.Dock,
 									},
 								},
-							}, logLevels[cmd.String("loglevel")], dryRun)
+							}, logLevel, dryRun)
 
 							if programsErr != nil {
 								return programsErr
 							}
 
-							lock.DeleteRemoved(lockConfig)
-							return lock.Create(parsedConfig.Home, parsedConfig.Secret)
+							lock.DeleteRemoved(lockConfig, logLevel, dryRun)
+							return lock.Create(parsedConfig.Home, parsedConfig.Secret, logLevel, dryRun)
 						}).
 						Run()
 				},

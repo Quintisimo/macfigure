@@ -110,3 +110,9 @@ func WriteConfig(config reflect.Value, domain string, addCmd string, rmCmd strin
 	}
 	return nil
 }
+
+func CreateLogger(logLevel log.Level, section string) *log.Logger {
+	logger := log.New(os.Stderr)
+	logger.SetLevel(logLevel)
+	return logger.With("section", section)
+}

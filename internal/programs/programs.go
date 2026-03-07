@@ -1,9 +1,8 @@
 package programs
 
 import (
-	"os"
-
 	"github.com/charmbracelet/log"
+	"github.com/quintisimo/macfigure/internal/utils"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -22,14 +21,13 @@ type Execution interface {
 }
 
 func RunInParallel(programs []Execution, logLevel log.Level, dryRun bool) error {
-	logger := log.New(os.Stderr)
-	logger.SetLevel(logLevel)
+	logger := utils.CreateLogger(logLevel, "programs")
 
 	wg := new(errgroup.Group)
 
 	for _, program := range programs {
 		wg.Go(func() error {
-			return program.Run(logger.With("section", program.GetName()), dryRun)
+			return program.Run(logger, dryRun)
 		})
 	}
 
