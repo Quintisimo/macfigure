@@ -59,9 +59,8 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			{
-				Name:    "sync",
-				Usage:   "Sync system with config",
-				Aliases: []string{"s"},
+				Name:  "sync",
+				Usage: "Sync system with config",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "loglevel",

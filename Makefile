@@ -11,4 +11,4 @@ gen: internal/programs/config/Config.pkl.go
 
 .PHONY: run
 run: gen
-	go run main.go s -d -c test-config.pkl
+	go run main.go sync -d -c test-config.pkl
