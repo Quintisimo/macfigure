@@ -4,85 +4,51 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 
 	"filippo.io/age"
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/log"
 	"github.com/quintisimo/macfigure/internal/utils"
 )
 
 func DecryptSecretFile(secretFileName string, logger *log.Logger, dryRun bool) (io.Reader, error) {
 	if !dryRun {
-		return decryptFile(secretFileName)
+		reader, _, decryptErr := decryptFile(secretFileName)
+		return reader, decryptErr
 	} else {
 		utils.DryRunInfo(fmt.Sprintf("Reading %s", secretFileName), logger)
 	}
 	return nil, nil
 }
 
-func decryptFile(secretFileName string) (io.Reader, error) {
+func decryptFile(secretFileName string) (io.Reader, string, error) {
 	decryptionKey, decryptionKeyErr := DecryptionKeyItem.Get()
 	if decryptionKeyErr != nil {
-		return nil, decryptionKeyErr
+		return nil, "", decryptionKeyErr
 	}
 
 	identity, identityErr := age.ParseX25519Identity(decryptionKey)
 	if identityErr != nil {
-		return nil, identityErr
+		return nil, "", identityErr
 	}
 
 	file, fileErr := os.Open(secretFileName)
 	if fileErr != nil {
-		return nil, fileErr
+		return nil, "", fileErr
 	}
 	defer file.Close()
 
 	reader, readerErr := age.Decrypt(file, identity)
 	if readerErr != nil {
-		return nil, readerErr
-	}
-	return reader, nil
-}
-
-func openSecretFile(secretFileName string) (string, error) {
-	reader, readerErr := decryptFile(secretFileName)
-	if readerErr != nil {
-		return "", readerErr
+		return nil, "", readerErr
 	}
 
-	tempFile, tempFileErr := os.CreateTemp("", "secret-edit-*.txt")
-	if tempFileErr != nil {
-		return "", tempFileErr
-	}
-	defer tempFile.Close()
-
-	if _, copyErr := io.Copy(tempFile, reader); copyErr != nil {
-		return "", copyErr
-	}
-	return tempFile.Name(), nil
-}
-
-func editSecretFile(tempFileName string) (string, error) {
-	editor := "vim"
-	cmd := exec.Command(editor, tempFileName)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if startErr := cmd.Start(); startErr != nil {
-		return "", startErr
+	content, contentErr := io.ReadAll(reader)
+	if contentErr != nil {
+		return nil, "", contentErr
 	}
 
-	if waitErr := cmd.Wait(); waitErr != nil {
-		return "", waitErr
-	}
-
-	contents, readErr := os.ReadFile(tempFileName)
-	if readErr != nil {
-		return "", readErr
-	}
-
-	return string(contents), nil
+	return reader, string(content), nil
 }
 
 func saveSecretFile(contents string, secretFileName string) error {
@@ -125,14 +91,12 @@ func Edit(secretFileName string) error {
 		}
 	}
 
-	tempFileName, tempFileErr := openSecretFile(secretFileName)
-	if tempFileErr != nil {
-		return tempFileErr
+	_, contents, decryptErr := decryptFile(secretFileName)
+	if decryptErr != nil {
+		return decryptErr
 	}
-	defer os.Remove(tempFileName)
 
-	contents, editErr := editSecretFile(tempFileName)
-	if editErr != nil {
+	if editErr := huh.NewText().Title(secretFileName).Value(&contents).Run(); editErr != nil {
 		return editErr
 	}
 
