@@ -85,19 +85,25 @@ func saveSecretFile(contents string, secretFileName string) error {
 }
 
 func Edit(secretFileName string) error {
-	if _, statErr := os.Stat(secretFileName); os.IsNotExist(statErr) {
-		if saveErr := saveSecretFile("", secretFileName); saveErr != nil {
-			return saveErr
+	contents := ""
+	prevContents := ""
+	var decryptErr error
+
+	if _, statErr := os.Stat(secretFileName); statErr == nil {
+		if _, contents, decryptErr = decryptFile(secretFileName); decryptErr != nil {
+			return decryptErr
 		}
+	} else if !os.IsNotExist(statErr) {
+		return statErr
 	}
 
-	_, contents, decryptErr := decryptFile(secretFileName)
-	if decryptErr != nil {
-		return decryptErr
-	}
-
+	prevContents = contents
 	if editErr := huh.NewText().Title(secretFileName).Value(&contents).Run(); editErr != nil {
 		return editErr
+	}
+
+	if contents == prevContents {
+		return nil
 	}
 
 	if saveErr := saveSecretFile(contents, secretFileName); saveErr != nil {

@@ -81,6 +81,8 @@ func Get(logLevel log.Level, dryRun bool) (*sync.Map, error) {
 
 		if _, statErr := os.Stat(lockPath); os.IsNotExist(statErr) {
 			return &lock, nil
+		} else if statErr != nil {
+			return &lock, statErr
 		}
 
 		lockFile, lockFileErr := os.Open(lockPath)
