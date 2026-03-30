@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/charmbracelet/log"
@@ -17,27 +16,18 @@ func createLockLogger(logLevel log.Level) *log.Logger {
 	return utils.CreateLogger(logLevel, "lock")
 }
 
-func getLockPath(logLevel log.Level, dryRun bool) (string, error) {
-	homeDir := os.Getenv("XDG_CONFIG_HOME")
-	if homeDir == "" {
-		homeDir = fmt.Sprintf("%s/.config", os.Getenv("HOME"))
-	}
+func getLockPath(configDir string, logLevel log.Level, dryRun bool) (string, error) {
+	lockPath := fmt.Sprintf("%s/config-lock.json", configDir)
 
-	lockPath := fmt.Sprintf("%s/macfigure/lock.json", homeDir)
-
-	if !dryRun {
-		if mkDirAllErr := os.MkdirAll(filepath.Dir(lockPath), 0755); mkDirAllErr != nil {
-			return "", mkDirAllErr
-		}
-	} else {
-		utils.DryRunInfo("Create lock file if not exists", createLockLogger(logLevel))
+	if dryRun {
+		utils.DryRunInfo(fmt.Sprintf("Lock file path: %s", lockPath), createLockLogger(logLevel))
 	}
 
 	return lockPath, nil
 }
 
-func Create(home []home.Home, secret []secret.Secret, logLevel log.Level, dryRun bool) error {
-	lockPath, lockPathErr := getLockPath(logLevel, dryRun)
+func Create(home []home.Home, secret []secret.Secret, configDir string, logLevel log.Level, dryRun bool) error {
+	lockPath, lockPathErr := getLockPath(configDir, logLevel, dryRun)
 	if lockPathErr != nil {
 		return lockPathErr
 	}
@@ -70,8 +60,8 @@ func Create(home []home.Home, secret []secret.Secret, logLevel log.Level, dryRun
 	return nil
 }
 
-func Get(logLevel log.Level, dryRun bool) (*sync.Map, error) {
-	lockPath, lockPathErr := getLockPath(logLevel, dryRun)
+func Get(configDir string, logLevel log.Level, dryRun bool) (*sync.Map, error) {
+	lockPath, lockPathErr := getLockPath(configDir, logLevel, dryRun)
 	var lock sync.Map
 
 	if !dryRun {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -33,6 +34,7 @@ func main() {
 	logLevelKeys := slices.Collect(maps.Keys(logLevels))
 
 	var parsedConfig config.Config
+	var configDir string
 
 	cli := &cli.Command{
 		Name:  "macfigure",
@@ -46,6 +48,7 @@ func main() {
 				Required:  true,
 				Action: func(ctx context.Context, cmd *cli.Command, path string) error {
 					var parsingErr error
+					configDir = filepath.Dir(path)
 					parsedConfig, parsingErr = config.LoadFromPath(context.Background(), path)
 					return parsingErr
 				},
@@ -82,7 +85,7 @@ func main() {
 							dryRun := cmd.Bool("dry-run")
 							logLevel := logLevels[cmd.String("loglevel")]
 
-							lockConfig, lockConfigErr := lock.Get(logLevel, dryRun)
+							lockConfig, lockConfigErr := lock.Get(configDir, logLevel, dryRun)
 							if lockConfigErr != nil {
 								return lockConfigErr
 							}
@@ -133,7 +136,7 @@ func main() {
 							}
 
 							lock.DeleteRemoved(lockConfig, logLevel, dryRun)
-							return lock.Create(parsedConfig.Home, parsedConfig.Secret, logLevel, dryRun)
+							return lock.Create(parsedConfig.Home, parsedConfig.Secret, configDir, logLevel, dryRun)
 						}).
 						Run()
 				},
