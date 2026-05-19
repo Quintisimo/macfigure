@@ -21,9 +21,8 @@ universal_binaries:
   - replace: true
 
 archives:
-  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    formats:
-      - tar.gz
+  - name_template: "{{ .ProjectName }}"
+    format: binary
 
 checksum:
   name_template: "checksums.txt"
