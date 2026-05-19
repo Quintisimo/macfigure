@@ -10,6 +10,10 @@ internal/programs/config/Config.pkl.go: $(PKL_SRC)
 gen: internal/programs/config/Config.pkl.go
 
 .PHONY: sync
+version: gen
+	go run main.go version
+
+.PHONY: sync
 sync: gen
 	go run main.go sync -d -c test-config.pkl
 

@@ -1,0 +1,43 @@
+version: 2
+
+project_name: macfigure
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - binary: macfigure
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X "main.version={{ .Version }}"
+
+universal_binaries:
+  - replace: true
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+release:
+  draft: false
+  prerelease: auto

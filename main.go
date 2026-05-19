@@ -23,6 +23,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+var version = "dev"
+
 func main() {
 	defaultLogLevel := "info"
 	logLevels := map[string]log.Level{
@@ -35,36 +37,45 @@ func main() {
 
 	var parsedConfig config.Config
 	var configDir string
+	var configFlag *cli.StringFlag = &cli.StringFlag{
+		Name:      "config",
+		Aliases:   []string{"c"},
+		Usage:     "Path to the configuration `file`",
+		TakesFile: true,
+		Required:  true,
+		Action: func(ctx context.Context, cmd *cli.Command, path string) error {
+			var parsingErr error
+			configDir = filepath.Dir(path)
+			parsedConfig, parsingErr = config.LoadFromPath(context.Background(), path)
+			return parsingErr
+		},
+	}
 
 	cli := &cli.Command{
 		Name:  "macfigure",
 		Usage: "A tool to manage macOS configurations",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:      "config",
-				Aliases:   []string{"c"},
-				Usage:     "Path to the configuration `file`",
-				TakesFile: true,
-				Required:  true,
-				Action: func(ctx context.Context, cmd *cli.Command, path string) error {
-					var parsingErr error
-					configDir = filepath.Dir(path)
-					parsedConfig, parsingErr = config.LoadFromPath(context.Background(), path)
-					return parsingErr
-				},
-			},
 			&cli.BoolFlag{
 				Name:    "dry-run",
 				Aliases: []string{"d"},
-				Value:   true,
+				Value:   false,
 				Usage:   "Perform a dry run without making any changes",
 			},
 		},
 		Commands: []*cli.Command{
 			{
+				Name:  "version",
+				Usage: "Cli version",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					fmt.Printf("Version: %s\n", version)
+					return nil
+				},
+			},
+			{
 				Name:  "sync",
 				Usage: "Sync system with config",
 				Flags: []cli.Flag{
+					configFlag,
 					&cli.StringFlag{
 						Name:    "loglevel",
 						Aliases: []string{"l"},
@@ -144,6 +155,9 @@ func main() {
 			{
 				Name:  "secret",
 				Usage: "Manage secrets with age",
+				Flags: []cli.Flag{
+					configFlag,
+				},
 				Commands: []*cli.Command{
 					{
 						Name:  "keychain",
