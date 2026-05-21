@@ -20,6 +20,8 @@ The script will:
 
 Example `config.pkl`:
 
+- Allowed values for each section can be found in the section pkl file in the [pkl folder](./pkl)
+
 ```pkl
 amends "https://raw.githubusercontent.com/quintisimo/macfigure/pkl/config.pkl"
 
