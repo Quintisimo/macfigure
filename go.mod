@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	filippo.io/age v1.3.1
-	github.com/apple/pkl-go v0.13.2
+	github.com/apple/pkl-go v0.14.0
 	github.com/charmbracelet/huh v1.0.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20251124111010-6575a6e28cb3
 	github.com/charmbracelet/log v1.0.0
