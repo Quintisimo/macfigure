@@ -1,6 +1,6 @@
 module github.com/quintisimo/macfigure
 
-go 1.25.1
+go 1.26.0
 
 require (
 	filippo.io/age v1.3.2
@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20251124111010-6575a6e28cb3
 	github.com/charmbracelet/log v1.0.0
 	github.com/urfave/cli/v3 v3.11.0
-	golang.org/x/sync v0.22.0
+	golang.org/x/sync v0.23.0
 )
 
 require (
